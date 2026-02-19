@@ -1,27 +1,64 @@
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../models/market_model.dart';
 
 class MarketController extends GetxController {
-  var isLoading = false.obs;
+  var isLoading = true.obs;
+  var allPrices = <MarketModel>[].obs;
+  var priceList = <MarketModel>[].obs;
   
-  // Point 9: Dummy data for Mandi Prices
-  // Ise kisan ko rates dikhane ke liye use karenge
-  var mandiPrices = [
-    {"crop": "Wheat (Gehu)", "price": "₹2,450/Qtl", "trend": "up", "mandi": "Indore"},
-    {"crop": "Rice (Chawal)", "price": "₹3,800/Qtl", "trend": "down", "mandi": "Bhopal"},
-    {"crop": "Maize (Makka)", "price": "₹2,100/Qtl", "trend": "stable", "mandi": "Ujjain"},
-    {"crop": "Soybean", "price": "₹4,600/Qtl", "trend": "up", "mandi": "Indore"},
-  ].obs;
+  final box = GetStorage();
+
+  // Backend API URL - your laptop's IP for physical device testing
+  static const String baseUrl = 'http://10.179.18.46:5000';
 
   @override
   void onInit() {
     super.onInit();
+    loadOfflineData();
     fetchPrices();
   }
 
-  void fetchPrices() async {
-    isLoading.value = true;
-    // Real API connect karne ke liye yahan logic aayega
-    await Future.delayed(const Duration(seconds: 1)); 
-    isLoading.value = false;
+  void loadOfflineData() {
+    var storedData = box.read('mandi_cache');
+    if (storedData != null) {
+      var list = (storedData as List).map((e) => MarketModel.fromJson(e)).toList();
+      allPrices.assignAll(list);
+      priceList.assignAll(list);
+    }
+  }
+
+  Future<void> fetchPrices() async {
+    try {
+      isLoading(true);
+      final response = await http.get(
+        Uri.parse('$baseUrl/mandi-prices'),
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body) as List;
+        var fetchedList = data.map((item) => MarketModel.fromJson(item)).toList();
+        
+        allPrices.assignAll(fetchedList);
+        priceList.assignAll(fetchedList);
+        box.write('mandi_cache', fetchedList.map((e) => e.toJson()).toList());
+      }
+    } catch (e) {
+      print("Connection Error: $e");
+    } finally {
+      isLoading(false);
+    }
+  }
+
+  void filterSearch(String query) {
+    if (query.isEmpty) {
+      priceList.assignAll(allPrices);
+    } else {
+      priceList.assignAll(allPrices.where((item) =>
+          item.cropName.toLowerCase().contains(query.toLowerCase()) ||
+          item.marketName.toLowerCase().contains(query.toLowerCase())).toList());
+    }
   }
 }

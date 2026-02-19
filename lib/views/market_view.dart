@@ -7,46 +7,64 @@ class MarketView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MarketController controller = Get.put(MarketController());
+    final controller = Get.put(MarketController());
 
     return Scaffold(
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        return ListView.builder(
-          itemCount: controller.mandiPrices.length,
-          itemBuilder: (context, index) {
-            var item = controller.mandiPrices[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              elevation: 2,
-              child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.green,
-                  child: Icon(Icons.store, color: Colors.white),
-                ),
-                title: Text(item['crop']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Mandi: ${item['mandi']}"),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(item['price']!, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16)),
-                    Icon(
-                      item['trend'] == 'up' ? Icons.trending_up : Icons.trending_down,
-                      color: item['trend'] == 'up' ? Colors.green : Colors.red,
-                      size: 20,
-                    )
-                  ],
-                ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text("Mandi Rates", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              onChanged: (value) => controller.filterSearch(value),
+              decoration: InputDecoration(
+                hintText: "Search Crop or Mandi...",
+                prefixIcon: const Icon(Icons.search, color: Colors.green),
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
               ),
-            );
-          },
-        );
-      }),
+            ),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.priceList.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: controller.priceList.length,
+                itemBuilder: (context, index) {
+                  final item = controller.priceList[index];
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(12),
+                      title: Text(item.cropName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(item.marketName, style: const TextStyle(fontSize: 12)),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text("₹${item.currentPrice}", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(item.unit, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'scan_view.dart';
-import 'weather_view.dart';
-import 'market_view.dart'; // Naya View Import kiya
+import 'package:agrishield_app/views/scan_view.dart';
+import 'package:agrishield_app/views/wx.dart';
+import 'package:agrishield_app/views/market_view.dart'; // Naya View Import kiya
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
   // Pages list updated for Point 9
   final List<Widget> pages = [
     const ScanView(),
-    const WeatherView(),
+    const Wx(),
     const MarketView(), // Market tab add ho gaya
     const Center(child: Text("Insurance Feature (Coming Soon)")),
   ];
