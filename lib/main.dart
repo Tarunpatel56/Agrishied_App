@@ -2,11 +2,18 @@ import 'package:agrishield_app/views/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart'; // Ye import zaroori hai
 import 'package:get/get.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 // Apne baaki imports bhi yahan rakhein
 
 void main() async {
+  
   // 1. Flutter bindings initialize karna zaroori hai jab hum 'async' use karte hain
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+);
   
   // 2. GetStorage ko initialize karein taaki data save ho sake
   await GetStorage.init(); 

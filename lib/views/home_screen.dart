@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:agrishield_app/views/scan_view.dart';
 import 'package:agrishield_app/views/wx.dart';
-import 'package:agrishield_app/views/market_view.dart'; // Naya View Import kiya
+import 'package:agrishield_app/views/market_view.dart';
+import 'package:agrishield_app/views/soil_view.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   final RxInt currentIndex = 0.obs;
-  
-  // Pages list updated for Point 9
+
   final List<Widget> pages = [
     const ScanView(),
     const Wx(),
-    const MarketView(), // Market tab add ho gaya
+    const MarketView(),
+    // const SoilView(),
     const Center(child: Text("Insurance Feature (Coming Soon)")),
   ];
 
@@ -26,19 +27,31 @@ class HomeScreen extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       body: Obx(() => pages[currentIndex.value]),
-      bottomNavigationBar: Obx(() => BottomNavigationBar(
-        currentIndex: currentIndex.value,
-        onTap: (index) => currentIndex.value = index,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: "Scan"),
-          BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Weather"),
-          BottomNavigationBarItem(icon: Icon(Icons.shop), label: "Market"),
-          BottomNavigationBarItem(icon: Icon(Icons.security), label: "Insurance"),
-        ],
-      )),
+      bottomNavigationBar: Obx(
+        () => BottomNavigationBar(
+          currentIndex: currentIndex.value,
+          onTap: (index) => currentIndex.value = index,
+          selectedItemColor: Colors.green,
+          unselectedItemColor: Colors.grey,
+          type: BottomNavigationBarType.fixed,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.camera_alt),
+              label: "Scan",
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Weather"),
+            BottomNavigationBarItem(icon: Icon(Icons.shop), label: "Market"),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.landscape),
+            //   label: "Soil",
+            // ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.security),
+              label: "Insurance",
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
