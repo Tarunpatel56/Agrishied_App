@@ -74,6 +74,31 @@ class ScanModel {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'crop_name': cropName,
+        'crop_name_hindi': cropNameHindi,
+        'age': age,
+        'stage': stage,
+        'health_score': healthScore,
+        'health_status': healthStatus,
+        'pros': pros,
+        'cons': cons,
+        'requirements': requirements,
+        'growth_products': products,
+        'disease': disease,
+        'disease_cause': diseaseCause,
+        'disease_prevention': diseasePrevention,
+        'treatment': treatment,
+        'irrigation_advice': irrigationAdvice,
+        'fertilizer_recommendation': fertilizerRecommendation,
+        'growth_tips': growthTips,
+        'harvest_readiness': harvestReadiness,
+        'harvest_days': harvestDays,
+        'harvest_date': harvestDate,
+        'total_lifecycle': totalLifecycle,
+        'confidence': confidence,
+      };
+
   static int _parseInt(dynamic value) {
     if (value == null) return 0;
     if (value is int) return value;

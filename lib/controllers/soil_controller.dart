@@ -5,9 +5,11 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/soil_model.dart';
+import '../services/firestore_service.dart';
 
 class SoilController extends GetxController {
   var isLoading = false.obs;
+  var lastSoilDocId = Rxn<String>(); // Track Firestore doc ID for linking
   var loadingMsg = ''.obs;
   var soilResult = Rxn<SoilModel>();
   var plantRecommendations = <PlantRecommendation>[].obs;
@@ -67,6 +69,12 @@ class SoilController extends GetxController {
         final json = jsonDecode(response.body);
         if (json['status'] == 'Success') {
           soilResult.value = SoilModel.fromJson(json['data']);
+
+          // 🔥 Save to Firestore
+          final docId = await FirestoreService.saveSoilAnalysis(
+            soilResult.value!.toJson(),
+          );
+          lastSoilDocId.value = docId;
         } else {
           _err('Analysis Failed', json['error'] ?? 'Could not analyze');
         }
@@ -105,6 +113,14 @@ class SoilController extends GetxController {
           final List<dynamic> data = json['data'];
           plantRecommendations.value =
               data.map((e) => PlantRecommendation.fromJson(e)).toList();
+
+          // 🔥 Save to Firestore
+          FirestoreService.saveRecommendations(
+            type: 'plant',
+            items: plantRecommendations.map((e) => e.toJson()).toList(),
+            soilDocId: lastSoilDocId.value,
+            soilType: soilResult.value?.soilType,
+          );
         } else {
           _err('Error', json['error'] ?? 'Failed');
         }
@@ -188,6 +204,15 @@ class SoilController extends GetxController {
           final List<dynamic> data = json['data'];
           cropRecommendations.value =
               data.map((e) => CropRecommendation.fromJson(e)).toList();
+
+          // 🔥 Save to Firestore
+          FirestoreService.saveRecommendations(
+            type: 'crop',
+            items: cropRecommendations.map((e) => e.toJson()).toList(),
+            soilDocId: lastSoilDocId.value,
+            soilType: soilResult.value?.soilType,
+            season: selectedSeason.value,
+          );
         } else {
           _err('Error', json['error'] ?? 'Failed');
         }

@@ -139,6 +139,27 @@ class PlantRecommendation {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'plant_name': plantName,
+        'plant_name_hindi': plantNameHindi,
+        'suitability': suitability,
+        'plant_type': plantType,
+        'growth_days': growthDays,
+        'plant_age_info': plantAgeInfo,
+        'sunlight_needs': sunlightNeeds,
+        'water_needs': waterNeeds,
+        'fertilizer_needs': fertilizerNeeds,
+        'soil_preparation': soilPreparation,
+        'planting_method': plantingMethod,
+        'care_steps': careSteps,
+        'common_diseases': commonDiseases,
+        'harvest_info': harvestInfo,
+        'benefits': benefits,
+        'best_season': bestSeason,
+        'difficulty_level': difficultyLevel,
+        'description': description,
+      };
+
   static int _toInt(dynamic v) {
     if (v is int) return v;
     if (v is double) return v.toInt();
@@ -219,6 +240,30 @@ class CropRecommendation {
       description: json['description'] ?? 'N/A',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'crop_name': cropName,
+        'crop_name_hindi': cropNameHindi,
+        'suitability': suitability,
+        'season': season,
+        'best_planting_month': bestPlantingMonth,
+        'growth_duration_days': growthDurationDays,
+        'crop_age_stages': cropAgeStages,
+        'seed_quantity': seedQuantity,
+        'soil_preparation_steps': soilPreparationSteps,
+        'fertilizer_schedule': fertilizerSchedule,
+        'irrigation_schedule': irrigationSchedule,
+        'pesticide_needs': pesticideNeeds,
+        'weed_management': weedManagement,
+        'expected_yield': expectedYield,
+        'expected_profit': expectedProfit,
+        'benefits': benefits,
+        'drawbacks': drawbacks,
+        'growth_requirements': growthRequirements,
+        'harvest_method': harvestMethod,
+        'market_demand': marketDemand,
+        'description': description,
+      };
 
   static int _toInt(dynamic v) {
     if (v is int) return v;

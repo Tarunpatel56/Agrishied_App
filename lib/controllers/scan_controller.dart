@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/scan_model.dart';
+import '../services/firestore_service.dart';
 
 class ScanController extends GetxController {
   var isLoading = false.obs;
@@ -60,6 +61,9 @@ class ScanController extends GetxController {
       if (jsonResponse['status'] == 'Success') {
         var d = jsonResponse['data'];
         result.value = ScanModel.fromJson(d);
+
+        // 🔥 Save to Firestore
+        FirestoreService.saveCropScan(result.value!.toJson());
       } else {
         Get.snackbar(
           "Analysis Failed",
