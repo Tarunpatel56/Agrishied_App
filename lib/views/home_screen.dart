@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:agrishield_app/views/scan_view.dart';
 import 'package:agrishield_app/views/wx.dart';
 import 'package:agrishield_app/views/market_view.dart';
-import 'package:agrishield_app/views/soil_view.dart';
+import 'package:agrishield_app/views/profile_view.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -14,8 +14,8 @@ class HomeScreen extends StatelessWidget {
     const ScanView(),
     const Wx(),
     const MarketView(),
-    // const SoilView(),
-    const Center(child: Text("Insurance Feature (Coming Soon)")),
+    
+    const ProfileView(),
   ];
 
   @override
@@ -41,13 +41,9 @@ class HomeScreen extends StatelessWidget {
             ),
             BottomNavigationBarItem(icon: Icon(Icons.cloud), label: "Weather"),
             BottomNavigationBarItem(icon: Icon(Icons.shop), label: "Market"),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.landscape),
-            //   label: "Soil",
-            // ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.security),
-              label: "Insurance",
+              icon: Icon(Icons.person_rounded),
+              label: "Profile",
             ),
           ],
         ),

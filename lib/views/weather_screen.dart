@@ -33,7 +33,7 @@ class WeatherView extends StatelessWidget {
               children: [
                 const Icon(Icons.cloud_off_rounded, size: 60, color: Colors.grey),
                 const SizedBox(height: 10),
-                const Text('Weather data load nahi hua'),
+                const Text('Weather data could not be loaded'),
                 TextButton(
                   onPressed: controller.fetchWeather,
                   child: const Text('Retry'),
