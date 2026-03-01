@@ -3,14 +3,18 @@ import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProfileController extends GetxController {
   final _storage = GetStorage();
+  final _auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
 
   // Profile fields
   var farmerName = 'Farmer'.obs;
-  var farmerPhone = '+918989550196'.obs;
-  var farmerEmail = 'tarunpatel2956@gmail.com'.obs;
+  var farmerPhone = ''.obs;
+  var farmerEmail = ''.obs;
   var farmerLocation = 'Madhya Pradesh, India'.obs;
   var farmSize = '5 Acre'.obs;
 
@@ -28,18 +32,44 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadProfile();
+    loadProfile();
     fetchAlertStats();
   }
 
-  void _loadProfile() {
+  /// Load profile from Firestore (primary) + GetStorage (fallback)
+  Future<void> loadProfile() async {
+    // First load from local storage (instant)
     farmerName.value = _storage.read('farmer_name') ?? 'Farmer';
-    farmerPhone.value = _storage.read('farmer_phone') ?? '+918989550196';
-    farmerEmail.value =
-        _storage.read('farmer_email') ?? 'tarunpatel2956@gmail.com';
+    farmerPhone.value = _storage.read('farmer_phone') ?? '';
+    farmerEmail.value = _storage.read('farmer_email') ?? '';
     farmerLocation.value =
         _storage.read('farmer_location') ?? 'Madhya Pradesh, India';
     farmSize.value = _storage.read('farm_size') ?? '5 Acre';
+
+    // Then try to load from Firestore (latest data)
+    try {
+      final uid = _auth.currentUser?.uid;
+      if (uid != null) {
+        final doc = await _db.collection('users').doc(uid).get();
+        if (doc.exists) {
+          final data = doc.data()!;
+          farmerName.value = data['name'] ?? farmerName.value;
+          farmerPhone.value = data['phone'] ?? farmerPhone.value;
+          farmerEmail.value = data['email'] ?? farmerEmail.value;
+          farmerLocation.value = data['location'] ?? farmerLocation.value;
+          farmSize.value = data['farm_size'] ?? farmSize.value;
+
+          // Sync to local storage
+          _storage.write('farmer_name', farmerName.value);
+          _storage.write('farmer_phone', farmerPhone.value);
+          _storage.write('farmer_email', farmerEmail.value);
+          _storage.write('farmer_location', farmerLocation.value);
+          _storage.write('farm_size', farmSize.value);
+        }
+      }
+    } catch (e) {
+      print('[Profile] Firestore load error: $e');
+    }
   }
 
   void saveProfile({

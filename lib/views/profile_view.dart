@@ -17,7 +17,9 @@ class ProfileView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
       body: Obx(
         () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator(color: Colors.green))
+            ? const Center(
+                child: CircularProgressIndicator(color: Colors.green),
+              )
             : RefreshIndicator(
                 onRefresh: () => controller.fetchAlertStats(),
                 child: SingleChildScrollView(
@@ -94,42 +96,53 @@ class ProfileView extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 3),
             ),
-            child:
-                const Icon(Icons.person_rounded, size: 45, color: Colors.white),
+            child: const Icon(
+              Icons.person_rounded,
+              size: 45,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 12),
-          Obx(() => Text(
-                c.farmerName.value,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              )),
+          Obx(
+            () => Text(
+              c.farmerName.value,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
           const SizedBox(height: 4),
-          Obx(() => Text(
-                '📍 ${c.farmerLocation.value}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white.withOpacity(0.9),
-                ),
-              )),
+          Obx(
+            () => Text(
+              '📍 ${c.farmerLocation.value}',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.9),
+              ),
+            ),
+          ),
           const SizedBox(height: 4),
-          Obx(() => Text(
-                '🌾 Farm: ${c.farmSize.value}  •  📱 ${c.farmerPhone.value}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.85),
-                ),
-              )),
+          Obx(
+            () => Text(
+              '🌾 Farm: ${c.farmSize.value}  •  📱 ${c.farmerPhone.value}',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
+          ),
           const SizedBox(height: 4),
-          Obx(() => Text(
-                '📧 ${c.farmerEmail.value}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.white.withOpacity(0.85),
-                ),
-              )),
+          Obx(
+            () => Text(
+              '📧 ${c.farmerEmail.value}',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.white.withOpacity(0.85),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -187,7 +200,6 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-
   Widget _buildStatsRow(ProfileController c) {
     return Row(
       children: [
@@ -230,11 +242,15 @@ class ProfileView extends StatelessWidget {
         children: [
           Text(emoji, style: const TextStyle(fontSize: 28)),
           const SizedBox(height: 6),
-          Text(value,
-              style: TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-          Text(label,
-              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),
     );
@@ -253,8 +269,10 @@ class ProfileView extends StatelessWidget {
           children: [
             Icon(Icons.notifications_none, size: 40, color: Colors.grey),
             SizedBox(height: 8),
-            Text('No alerts at the moment',
-                style: TextStyle(color: Colors.grey)),
+            Text(
+              'No alerts at the moment',
+              style: TextStyle(color: Colors.grey),
+            ),
           ],
         ),
       );
@@ -266,17 +284,16 @@ class ProfileView extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('📋 Recent Alerts',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            '📋 Recent Alerts',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 10),
           ...c.recentAlerts.map((alert) => _alertTile(alert)),
         ],
@@ -331,9 +348,10 @@ class ProfileView extends StatelessWidget {
                   ),
                 ),
                 if (crop.isNotEmpty)
-                  Text(crop,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.black87)),
+                  Text(
+                    crop,
+                    style: const TextStyle(fontSize: 12, color: Colors.black87),
+                  ),
                 Text(
                   time.length > 16 ? time.substring(0, 16) : time,
                   style: const TextStyle(fontSize: 11, color: Colors.grey),
@@ -353,8 +371,10 @@ class ProfileView extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () => c.sendTestAlert(),
         icon: const Icon(Icons.send_rounded),
-        label: const Text('Send Test Alert 🧪',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        label: const Text(
+          'Send Test Alert 🧪',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF1565C0),
           foregroundColor: Colors.white,
@@ -374,8 +394,10 @@ class ProfileView extends StatelessWidget {
       child: ElevatedButton.icon(
         onPressed: () => Get.to(() => const ReportsView()),
         icon: const Icon(Icons.analytics_rounded),
-        label: const Text('📊 View Reports',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        label: const Text(
+          '📊 View Reports',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF6A1B9A),
           foregroundColor: Colors.white,
@@ -390,7 +412,7 @@ class ProfileView extends StatelessWidget {
 
   Widget _buildSoilAnalysisButton() {
     return InkWell(
-      onTap: () => Get.to(() => const SoilView()),
+      onTap: () => Get.to(() => const SoilView(showAppBar: true)),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
@@ -469,11 +491,14 @@ class ProfileView extends StatelessWidget {
           Get.offAll(() => LoginView());
         },
         icon: const Icon(Icons.logout_rounded, color: Colors.red),
-        label: const Text('Logout',
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.red)),
+        label: const Text(
+          'Logout',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.red,
+          ),
+        ),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: Colors.red, width: 1.5),
           shape: RoundedRectangleBorder(

@@ -7,6 +7,7 @@ class SignupView extends StatelessWidget {
   SignupView({super.key});
 
   final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -55,6 +56,39 @@ class SignupView extends StatelessWidget {
                     return null;
                   },
                   decoration: _inputDecoration('Full Name', Icons.person_rounded),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Mobile Number ──
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return 'Enter mobile number';
+                    final cleaned = val.replaceAll(RegExp(r'[^0-9]'), '');
+                    if (cleaned.length != 10) return 'Enter valid 10-digit number';
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Mobile Number',
+                    prefixIcon: const Icon(Icons.phone_rounded, color: Color(0xFF2E7D32)),
+                    prefixText: '+91 ',
+                    prefixStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -111,6 +145,7 @@ class SignupView extends StatelessWidget {
                                 if (_formKey.currentState!.validate()) {
                                   bool success = await auth.signup(
                                     name: _nameController.text,
+                                    phone: _phoneController.text.trim(),
                                     email: _emailController.text,
                                     password: _passwordController.text,
                                   );

@@ -4,13 +4,28 @@ import '../controllers/soil_controller.dart';
 import '../models/soil_model.dart';
 
 class SoilView extends StatelessWidget {
-  const SoilView({super.key});
+  final bool showAppBar;
+  const SoilView({super.key, this.showAppBar = false});
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(SoilController());
+    final c = Get.isRegistered<SoilController>()
+        ? Get.find<SoilController>()
+        : Get.put(SoilController());
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F0),
+      appBar: showAppBar
+          ? AppBar(
+              title: const Text('Soil Analysis'),
+              backgroundColor: const Color(0xFF3E2723),
+              foregroundColor: Colors.white,
+              elevation: 2,
+              leading: IconButton(
+                onPressed: () => Get.back(),
+                icon: const Icon(Icons.arrow_back_rounded),
+              ),
+            )
+          : null,
       body: Obx(() {
         if (c.isLoading.value) return _loading(c.loadingMsg.value);
         if (c.soilResult.value == null) return _placeholder(c);

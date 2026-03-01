@@ -1,8 +1,12 @@
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_storage/get_storage.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final _storage = GetStorage();
 
   var isLoading = false.obs;
   var currentUser = Rxn<User>();
@@ -19,6 +23,7 @@ class AuthController extends GetxController {
   // ── Sign Up ──────────────────────────────────────────────
   Future<bool> signup({
     required String name,
+    required String phone,
     required String email,
     required String password,
   }) async {
@@ -32,6 +37,25 @@ class AuthController extends GetxController {
       await cred.user?.updateDisplayName(name.trim());
       await cred.user?.reload();
       currentUser.value = _auth.currentUser;
+
+      // Format phone with +91 prefix
+      final cleanPhone = phone.replaceAll(RegExp(r'[^0-9]'), '');
+      final fullPhone = '+91$cleanPhone';
+
+      // Save user data to Firestore
+      await _db.collection('users').doc(cred.user!.uid).set({
+        'name': name.trim(),
+        'phone': fullPhone,
+        'email': email.trim(),
+        'created_at': DateTime.now().toIso8601String(),
+        'location': 'Madhya Pradesh, India',
+        'farm_size': '5 Acre',
+      });
+
+      // Save to local storage for ProfileController
+      _storage.write('farmer_name', name.trim());
+      _storage.write('farmer_phone', fullPhone);
+      _storage.write('farmer_email', email.trim());
 
       Get.snackbar('✅ Account Created', 'Welcome to AgriShield AI!',
           snackPosition: SnackPosition.BOTTOM);
@@ -72,6 +96,21 @@ class AuthController extends GetxController {
         email: email.trim(),
         password: password,
       );
+
+      // Fetch user data from Firestore and save locally
+      final uid = _auth.currentUser?.uid;
+      if (uid != null) {
+        final doc = await _db.collection('users').doc(uid).get();
+        if (doc.exists) {
+          final data = doc.data()!;
+          _storage.write('farmer_name', data['name'] ?? '');
+          _storage.write('farmer_phone', data['phone'] ?? '');
+          _storage.write('farmer_email', data['email'] ?? email.trim());
+          _storage.write('farmer_location', data['location'] ?? 'Madhya Pradesh, India');
+          _storage.write('farm_size', data['farm_size'] ?? '5 Acre');
+        }
+      }
+
       Get.snackbar('✅ Welcome Back!', 'Logged in successfully',
           snackPosition: SnackPosition.BOTTOM);
       return true;

@@ -11,6 +11,16 @@ class ReportsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
+      appBar: AppBar(
+        title: const Text('Reports'),
+        backgroundColor: const Color(0xFF6A1B9A),
+        foregroundColor: Colors.white,
+        elevation: 2,
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
+      ),
       body: Obx(
         () => controller.isLoading.value
             ? const Center(
