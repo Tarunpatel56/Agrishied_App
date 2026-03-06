@@ -3,6 +3,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/market_model.dart';
+import '../config/app_config.dart';
 
 class MarketController extends GetxController {
   var isLoading = true.obs;
@@ -11,8 +12,8 @@ class MarketController extends GetxController {
   
   final box = GetStorage();
 
-  // Backend API URL - your laptop's IP for physical device testing
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  // Backend API URL — central config se aata hai (app_config.dart)
+  String get baseUrl => AppConfig.baseUrl;
 
   @override
   void onInit() {

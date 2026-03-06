@@ -7,6 +7,7 @@ class SignupView extends StatelessWidget {
   SignupView({super.key});
 
   final _nameController = TextEditingController();
+  final _enrollmentController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -56,6 +57,17 @@ class SignupView extends StatelessWidget {
                     return null;
                   },
                   decoration: _inputDecoration('Full Name', Icons.person_rounded),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Enrollment ID (PM-KISAN) ──
+                TextFormField(
+                  controller: _enrollmentController,
+                  validator: (val) {
+                    if (val == null || val.isEmpty) return 'Enter your Enrollment ID';
+                    return null;
+                  },
+                  decoration: _inputDecoration('PM-KISAN Enrollment ID', Icons.badge_rounded),
                 ),
                 const SizedBox(height: 16),
 
@@ -148,6 +160,7 @@ class SignupView extends StatelessWidget {
                                     phone: _phoneController.text.trim(),
                                     email: _emailController.text,
                                     password: _passwordController.text,
+                                    enrollmentId: _enrollmentController.text.trim(),
                                   );
                                   if (success) {
                                     Get.offAll(() => HomeScreen());

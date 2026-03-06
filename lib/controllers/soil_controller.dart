@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/soil_model.dart';
 import '../services/firestore_service.dart';
+import '../config/app_config.dart';
 
 class SoilController extends GetxController {
   var isLoading = false.obs;
@@ -25,8 +26,8 @@ class SoilController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
 
-  // Backend URL — your laptop IP for real phone
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  // Backend API URL — central config se aata hai (app_config.dart)
+  String get baseUrl => AppConfig.baseUrl;
 
   // ==========================================
   // STEP 1: Capture soil photo
@@ -70,11 +71,14 @@ class SoilController extends GetxController {
         if (json['status'] == 'Success') {
           soilResult.value = SoilModel.fromJson(json['data']);
 
-          // 🔥 Save to Firestore
-          final docId = await FirestoreService.saveSoilAnalysis(
+          // 🔥 Save to Firestore (non-blocking — don't let Firestore errors block UI)
+          FirestoreService.saveSoilAnalysis(
             soilResult.value!.toJson(),
-          );
-          lastSoilDocId.value = docId;
+          ).then((docId) {
+            lastSoilDocId.value = docId;
+          }).catchError((e) {
+            print("[SoilController] Firestore save error (non-blocking): $e");
+          });
         } else {
           _err('Analysis Failed', json['error'] ?? 'Could not analyze');
         }

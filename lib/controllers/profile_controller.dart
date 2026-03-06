@@ -17,6 +17,7 @@ class ProfileController extends GetxController {
   var farmerEmail = ''.obs;
   var farmerLocation = 'Madhya Pradesh, India'.obs;
   var farmSize = '5 Acre'.obs;
+  var enrollmentId = ''.obs;
 
   // Alert stats
   var totalAlerts = 0.obs;
@@ -45,6 +46,7 @@ class ProfileController extends GetxController {
     farmerLocation.value =
         _storage.read('farmer_location') ?? 'Madhya Pradesh, India';
     farmSize.value = _storage.read('farm_size') ?? '5 Acre';
+    enrollmentId.value = _storage.read('enrollment_id') ?? '';
 
     // Then try to load from Firestore (latest data)
     try {
@@ -58,6 +60,7 @@ class ProfileController extends GetxController {
           farmerEmail.value = data['email'] ?? farmerEmail.value;
           farmerLocation.value = data['location'] ?? farmerLocation.value;
           farmSize.value = data['farm_size'] ?? farmSize.value;
+          enrollmentId.value = data['enrollment_id'] ?? enrollmentId.value;
 
           // Sync to local storage
           _storage.write('farmer_name', farmerName.value);
@@ -65,6 +68,7 @@ class ProfileController extends GetxController {
           _storage.write('farmer_email', farmerEmail.value);
           _storage.write('farmer_location', farmerLocation.value);
           _storage.write('farm_size', farmSize.value);
+          _storage.write('enrollment_id', enrollmentId.value);
         }
       }
     } catch (e) {

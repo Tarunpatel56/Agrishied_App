@@ -1,13 +1,15 @@
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/app_config.dart';
 
 class GovtSchemesController extends GetxController {
   var isLoading = true.obs;
   var schemes = <Map<String, dynamic>>[].obs;
   var filteredSchemes = <Map<String, dynamic>>[].obs;
 
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  // Backend API URL — central config se aata hai (app_config.dart)
+  String get baseUrl => AppConfig.baseUrl;
 
   @override
   void onInit() {

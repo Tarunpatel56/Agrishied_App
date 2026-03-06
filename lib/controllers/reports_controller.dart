@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../services/firestore_service.dart';
+import '../config/app_config.dart';
 
 class ReportsController extends GetxController {
   var isLoading = false.obs;
@@ -16,7 +17,8 @@ class ReportsController extends GetxController {
   var diseasesDetected = 0.obs;
   var totalAlerts = 0.obs;
 
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  // Backend API URL — central config se aata hai (app_config.dart)
+  String get baseUrl => AppConfig.baseUrl;
 
   @override
   void onInit() {

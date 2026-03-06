@@ -16,7 +16,7 @@ class ScanView extends StatelessWidget {
         if (controller.result.value == null) return _buildPlaceholder();
 
         final data = controller.result.value!;
-        return _buildResultView(data);
+        return _buildResultView(data, controller);
       }),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: controller.showImagePicker,
@@ -105,10 +105,16 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // RESULT VIEW
   // ==========================================
-  Widget _buildResultView(data) {
+  Widget _buildResultView(data, ScanController controller) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       children: [
+        // 0. SCAN HISTORY CHIPS (multiple scans)
+        if (controller.scanHistory.length > 1) ...[
+          _buildScanHistoryChips(controller),
+          const SizedBox(height: 12),
+        ],
+
         // 1. CROP HEADER
         _buildCropHeader(data),
         const SizedBox(height: 16),
@@ -124,7 +130,7 @@ class ScanView extends StatelessWidget {
         // 4. HARVEST PREDICTION
         _buildSection(
           "🌾 Harvest Prediction",
-          Color(0xFF1B5E20),
+          const Color(0xFF1B5E20),
           [
             _buildDetailRow(Icons.calendar_today, "Expected Date", data.harvestDate),
             _buildDetailRow(Icons.timer, "Days Remaining", "${data.harvestDays} days"),
@@ -177,8 +183,411 @@ class ScanView extends StatelessWidget {
 
         // 8. DISEASE ALERT
         _buildDiseaseSection(data),
+        const SizedBox(height: 16),
+
+        // 9. INSURANCE ELIGIBILITY CARD
+        _buildEligibilityCard(controller),
+        const SizedBox(height: 16),
+
+        // 10. FILE INSURANCE CLAIM — Blockchain Buttons
+        _buildClaimButtons(controller),
+        const SizedBox(height: 16),
+
+        // 11. FULL INSURANCE REPORT SECTION (below buttons)
+        _buildInsuranceReport(data, controller),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  // ==========================================
+  // SCAN HISTORY CHIPS
+  // ==========================================
+  Widget _buildScanHistoryChips(ScanController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '📋 Scan History (${controller.scanHistory.length} scans)',
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 36,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.scanHistory.length,
+              itemBuilder: (ctx, i) {
+                final scan = controller.scanHistory[i];
+                final isSelected = controller.currentScanIndex.value == i;
+                return GestureDetector(
+                  onTap: () => controller.viewScan(i),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFF2E7D32) : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected ? const Color(0xFF1B5E20) : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Text(
+                      '${scan.cropName} (${scan.healthScore}%)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? Colors.white : Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // INSURANCE ELIGIBILITY CARD
+  // ==========================================
+  Widget _buildEligibilityCard(ScanController controller) {
+    final eligible = controller.insuranceEligible.value;
+    final reason = controller.eligibilityReason.value;
+    final data = controller.eligibilityData.value;
+
+    if (reason.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: eligible ? Colors.green[50] : Colors.red[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: eligible ? Colors.green.shade300 : Colors.red.shade300,
+          width: 1.5,
+        ),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                eligible ? Icons.verified : Icons.cancel,
+                color: eligible ? Colors.green[700] : Colors.red[700],
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  eligible ? '✅ Insurance Eligible' : '❌ Insurance Not Eligible',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: eligible ? Colors.green[800] : Colors.red[800],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            reason,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.4,
+              color: eligible ? Colors.green[900] : Colors.red[900],
+            ),
+          ),
+          if (data != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _eligibilityChip(
+                  '⚠️ Damage',
+                  '${data['damage_percent']}%',
+                  (data['damage_percent'] ?? 0) >= 40 ? Colors.red : Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                _eligibilityChip(
+                  '🦠 Disease',
+                  data['has_disease'] == true ? 'Detected' : 'None',
+                  data['has_disease'] == true ? Colors.red : Colors.green,
+                ),
+                const SizedBox(width: 8),
+                _eligibilityChip(
+                  '🌤️ Weather',
+                  data['weather_supports'] == true ? 'Corroborated' : 'Normal',
+                  data['weather_supports'] == true ? Colors.orange : Colors.blue,
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _eligibilityChip(String label, String value, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color)),
+            Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==========================================
+  // CLAIM FILING BUTTONS
+  // ==========================================
+  Widget _buildClaimButtons(ScanController controller) {
+    final eligible = controller.insuranceEligible.value;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.teal.withOpacity(0.2)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.shield_rounded, color: Color(0xFF1B5E20), size: 20),
+              SizedBox(width: 8),
+              Text(
+                '🛡️ File Insurance Claim',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            eligible
+                ? 'Upload to blockchain (IPFS) for tamper-proof evidence'
+                : 'Insurance file karne ke liye fasal mein nuksan hona chahiye',
+            style: TextStyle(fontSize: 12, color: eligible ? Colors.grey[600] : Colors.red[400]),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              // Government Relief
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: eligible ? () => controller.fileGovtClaim() : null,
+                    icon: const Icon(Icons.account_balance, size: 18),
+                    label: const Text(
+                      'Sarkari Rahat',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E7D32),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey[300],
+                      disabledForegroundColor: Colors.grey[500],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: eligible ? 2 : 0,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Private Insurance
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: eligible ? () => controller.filePrivateClaim() : null,
+                    icon: const Icon(Icons.business, size: 18),
+                    label: const Text(
+                      'Private Claim',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1565C0),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey[300],
+                      disabledForegroundColor: Colors.grey[500],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: eligible ? 2 : 0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // FULL INSURANCE REPORT SECTION
+  // ==========================================
+  Widget _buildInsuranceReport(data, ScanController controller) {
+    final eligData = controller.eligibilityData.value;
+    final int damagePercent = (100 - data.healthScore as int).clamp(0, 100);
+    final bool hasDisease = data.disease.toLowerCase() != 'no disease detected' &&
+        data.disease.toLowerCase() != 'healthy' &&
+        data.disease.toLowerCase() != 'n/a';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.indigo.withOpacity(0.2)),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.description, color: Colors.indigo[700], size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '📄 Insurance Analysis Report',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo[800],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Report Table
+          _reportRow('Crop Name', data.cropName, Icons.eco),
+          _reportRow('Health Score', '${data.healthScore}%', Icons.favorite,
+              color: data.healthScore >= 60 ? Colors.green : Colors.red),
+          _reportRow('Damage Level', '$damagePercent%', Icons.warning_amber,
+              color: damagePercent > 70 ? Colors.red : damagePercent > 40 ? Colors.orange : Colors.green),
+          _reportRow('Disease', data.disease, Icons.coronavirus,
+              color: hasDisease ? Colors.red : Colors.green),
+          if (hasDisease) ...[
+            _reportRow('Disease Cause', data.diseaseCause, Icons.help_outline),
+            _reportRow('Treatment', data.treatment, Icons.medical_services),
+          ],
+          _reportRow('Health Status', data.healthStatus, Icons.monitor_heart),
+
+          const Divider(height: 20),
+
+          // Weather Corroboration
+          Row(
+            children: [
+              Icon(Icons.cloud, size: 16, color: Colors.blue[600]),
+              const SizedBox(width: 6),
+              Text(
+                'Weather Corroboration: ',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              Text(
+                eligData?['weather_supports'] == true ? '✅ Weather confirms damage risk' : '☀️ Normal weather conditions',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: eligData?['weather_supports'] == true ? Colors.orange[800] : Colors.blue[700],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+
+          // Eligibility Verdict
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: controller.insuranceEligible.value ? Colors.green[50] : Colors.red[50],
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: controller.insuranceEligible.value ? Colors.green.shade200 : Colors.red.shade200,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  controller.insuranceEligible.value ? Icons.check_circle : Icons.cancel,
+                  color: controller.insuranceEligible.value ? Colors.green : Colors.red,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    controller.insuranceEligible.value
+                        ? 'VERDICT: Insurance ke liye eligible ✅'
+                        : 'VERDICT: Insurance ke liye eligible nahi ❌',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: controller.insuranceEligible.value ? Colors.green[800] : Colors.red[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _reportRow(String label, String value, IconData icon, {Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color ?? Colors.grey[600]),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 110,
+            child: Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color ?? Colors.black87),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

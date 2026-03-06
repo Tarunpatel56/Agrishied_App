@@ -3,14 +3,15 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/weather_model.dart';
+import '../config/app_config.dart';
 
 class WeatherController extends GetxController {
   var isLoading = false.obs;
   var weatherResult = Rxn<WeatherModel>();
   var lastRefresh = ''.obs;
 
-  // Backend API URL
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  // Backend API URL — central config se aata hai (app_config.dart)
+  String get baseUrl => AppConfig.baseUrl;
 
   Timer? _autoRefreshTimer;
 

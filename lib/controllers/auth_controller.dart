@@ -26,6 +26,7 @@ class AuthController extends GetxController {
     required String phone,
     required String email,
     required String password,
+    required String enrollmentId,
   }) async {
     isLoading(true);
     try {
@@ -47,6 +48,7 @@ class AuthController extends GetxController {
         'name': name.trim(),
         'phone': fullPhone,
         'email': email.trim(),
+        'enrollment_id': enrollmentId.trim(),
         'created_at': DateTime.now().toIso8601String(),
         'location': 'Madhya Pradesh, India',
         'farm_size': '5 Acre',
@@ -56,6 +58,7 @@ class AuthController extends GetxController {
       _storage.write('farmer_name', name.trim());
       _storage.write('farmer_phone', fullPhone);
       _storage.write('farmer_email', email.trim());
+      _storage.write('enrollment_id', enrollmentId.trim());
 
       Get.snackbar('✅ Account Created', 'Welcome to AgriShield AI!',
           snackPosition: SnackPosition.BOTTOM);
@@ -108,6 +111,7 @@ class AuthController extends GetxController {
           _storage.write('farmer_email', data['email'] ?? email.trim());
           _storage.write('farmer_location', data['location'] ?? 'Madhya Pradesh, India');
           _storage.write('farm_size', data['farm_size'] ?? '5 Acre');
+          _storage.write('enrollment_id', data['enrollment_id'] ?? '');
         }
       }
 

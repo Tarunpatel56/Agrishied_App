@@ -143,6 +143,19 @@ class ProfileView extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 4),
+          Obx(
+            () => c.enrollmentId.value.isNotEmpty
+                ? Text(
+                    '🆔 PM-KISAN: ${c.enrollmentId.value}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.85),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );

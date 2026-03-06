@@ -3,10 +3,12 @@ import 'package:get/get.dart';
 import 'package:agrishield_app/views/scan_view.dart';
 import 'package:agrishield_app/views/wx.dart';
 import 'package:agrishield_app/views/market_view.dart';
+import 'package:agrishield_app/views/claims_view.dart';
 import 'package:agrishield_app/views/soil_view.dart';
 import 'package:agrishield_app/views/profile_view.dart';
 import 'package:agrishield_app/views/reports_view.dart';
 import 'package:agrishield_app/views/govt_schemes_view.dart';
+import 'package:agrishield_app/views/buy_policy_view.dart';
 import '../controllers/auth_controller.dart';
 import 'login_view.dart';
 
@@ -18,14 +20,14 @@ class HomeScreen extends StatelessWidget {
   final List<Widget> pages = [
     const ScanView(),
     const Wx(),
-    const MarketView(),
+    const ClaimsView(),
     const ProfileView(),
   ];
 
   final List<String> pageTitles = [
     'AgriShield AI',
     'Weather',
-    'Market',
+    'Claims',
     'Profile',
   ];
 
@@ -76,8 +78,8 @@ class HomeScreen extends StatelessWidget {
                 label: 'Weather',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shop),
-                label: 'Market',
+                icon: Icon(Icons.shield_rounded),
+                label: 'Claims',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.person_rounded),
@@ -170,8 +172,8 @@ class HomeScreen extends StatelessWidget {
                   label: 'Market Rates',
                   emoji: '🏪',
                   onTap: () {
-                    currentIndex.value = 2;
                     Get.back();
+                    Get.to(() => const MarketView());
                   },
                 ),
                 _drawerItem(
@@ -190,6 +192,15 @@ class HomeScreen extends StatelessWidget {
                   onTap: () {
                     Get.back();
                     Get.to(() => const GovtSchemesView());
+                  },
+                ),
+                _drawerItem(
+                  icon: Icons.shield_rounded,
+                  label: 'Buy Insurance',
+                  emoji: '🛡️',
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const BuyPolicyView());
                   },
                 ),
                 const Divider(height: 20, indent: 16, endIndent: 16),

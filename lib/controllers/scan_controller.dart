@@ -6,16 +6,31 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/scan_model.dart';
 import '../services/firestore_service.dart';
+import '../config/app_config.dart';
+import '../insurance/insurance_service.dart';
+import '../controllers/weather_controller.dart';
+import 'blockchain_controller.dart';
 
 class ScanController extends GetxController {
   var isLoading = false.obs;
   var result = Rxn<ScanModel>();
   var selectedImage = Rxn<File>();
 
-  final ImagePicker _picker = ImagePicker();
+  // Insurance eligibility
+  var insuranceEligible = false.obs;
+  var eligibilityReason = ''.obs;
+  var eligibilityReasonEn = ''.obs;
+  var eligibilityData = Rxn<Map<String, dynamic>>();
 
-  // Backend API URL - your laptop's IP for physical device testing
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  // Scan history for multiple views
+  var scanHistory = <ScanModel>[].obs;
+  var currentScanIndex = 0.obs;
+
+  final ImagePicker _picker = ImagePicker();
+  final InsuranceService _insuranceService = InsuranceService();
+
+  // Backend API URL — central config se aata hai (app_config.dart)
+  String get baseUrl => AppConfig.baseUrl;
 
   /// Pick image from Camera
   Future<void> scanFromCamera() async {
@@ -62,8 +77,15 @@ class ScanController extends GetxController {
         var d = jsonResponse['data'];
         result.value = ScanModel.fromJson(d);
 
+        // Add to scan history
+        scanHistory.insert(0, result.value!);
+        currentScanIndex.value = 0;
+
         // 🔥 Save to Firestore
         FirestoreService.saveCropScan(result.value!.toJson());
+
+        // ✅ Check insurance eligibility
+        _checkEligibility();
       } else {
         Get.snackbar(
           "Analysis Failed",
@@ -81,6 +103,87 @@ class ScanController extends GetxController {
     } finally {
       isLoading(false);
     }
+  }
+
+  /// Check insurance eligibility using crop analysis + weather cross-check
+  void _checkEligibility() {
+    if (result.value == null) return;
+
+    // Get weather data if available
+    String weatherCondition = 'unknown';
+    String diseaseRisk = 'unknown';
+    try {
+      final weatherCtrl = Get.find<WeatherController>();
+      if (weatherCtrl.weatherResult.value != null) {
+        weatherCondition = weatherCtrl.weatherResult.value!.condition;
+        diseaseRisk = weatherCtrl.weatherResult.value!.cropImpact.diseaseRisk;
+      }
+    } catch (_) {
+      // WeatherController not initialized yet — check without weather
+    }
+
+    final eligibility = _insuranceService.checkInsuranceEligibility(
+      healthScore: result.value!.healthScore,
+      disease: result.value!.disease,
+      weatherCondition: weatherCondition,
+      diseaseRisk: diseaseRisk,
+    );
+
+    insuranceEligible.value = eligibility['eligible'] ?? false;
+    eligibilityReason.value = eligibility['reason'] ?? '';
+    eligibilityReasonEn.value = eligibility['reason_en'] ?? '';
+    eligibilityData.value = eligibility;
+  }
+
+  /// View a previous scan from history
+  void viewScan(int index) {
+    if (index >= 0 && index < scanHistory.length) {
+      currentScanIndex.value = index;
+      result.value = scanHistory[index];
+      _checkEligibility();
+    }
+  }
+
+  /// File Government Relief Claim (Sarkari Rahat)
+  void fileGovtClaim() {
+    if (result.value == null) return;
+    if (!insuranceEligible.value) {
+      Get.snackbar(
+        '❌ Insurance Not Eligible',
+        eligibilityReason.value,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[50],
+        colorText: Colors.red[800],
+        duration: const Duration(seconds: 4),
+      );
+      return;
+    }
+    final bc = Get.put(BlockchainController());
+    bc.processClaim(
+      scanResult: result.value!,
+      claimType: 'government',
+    );
+  }
+
+  /// File Private Insurance Claim
+  void filePrivateClaim() {
+    if (result.value == null) return;
+    if (!insuranceEligible.value) {
+      Get.snackbar(
+        '❌ Insurance Not Eligible',
+        eligibilityReason.value,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[50],
+        colorText: Colors.red[800],
+        duration: const Duration(seconds: 4),
+      );
+      return;
+    }
+    final bc = Get.put(BlockchainController());
+    bc.processClaim(
+      scanResult: result.value!,
+      claimType: 'private',
+    );
   }
 
   /// Show image source picker dialog

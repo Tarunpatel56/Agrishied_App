@@ -11,7 +11,10 @@ class FirestoreService {
       scanData['timestamp'] = FieldValue.serverTimestamp();
       scanData['created_at'] = DateTime.now().toIso8601String();
 
-      await _db.collection('crop_scans').add(scanData);
+      await _db.collection('crop_scans').add(scanData).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Firestore timeout'),
+      );
       print('[Firestore] ✅ Crop scan saved successfully');
     } catch (e) {
       print('[Firestore] ❌ Error saving crop scan: $e');
@@ -26,7 +29,10 @@ class FirestoreService {
       soilData['timestamp'] = FieldValue.serverTimestamp();
       soilData['created_at'] = DateTime.now().toIso8601String();
 
-      final docRef = await _db.collection('soil_analyses').add(soilData);
+      final docRef = await _db.collection('soil_analyses').add(soilData).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Firestore timeout'),
+      );
       print('[Firestore] ✅ Soil analysis saved: ${docRef.id}');
       return docRef.id; // Return doc ID so we can link recommendations
     } catch (e) {
@@ -57,7 +63,10 @@ class FirestoreService {
         'created_at': DateTime.now().toIso8601String(),
       };
 
-      await _db.collection('recommendations').add(data);
+      await _db.collection('recommendations').add(data).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Firestore timeout'),
+      );
       print('[Firestore] ✅ $type recommendations saved (${items.length} items)');
     } catch (e) {
       print('[Firestore] ❌ Error saving recommendations: $e');
@@ -130,6 +139,50 @@ class FirestoreService {
       }).toList();
     } catch (e) {
       print('[Firestore] ❌ Error querying disease scans: $e');
+      return [];
+    }
+  }
+
+  // ==========================================
+  // 4. CLAIMS — Save & Fetch Insurance Claims
+  // ==========================================
+  static Future<void> saveClaim(Map<String, dynamic> claimData) async {
+    try {
+      claimData['timestamp'] = FieldValue.serverTimestamp();
+      claimData['created_at'] = DateTime.now().toIso8601String();
+
+      await _db.collection('Claims').add(claimData).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Firestore timeout'),
+      );
+      print('[Firestore] ✅ Claim saved successfully');
+    } catch (e) {
+      print('[Firestore] ❌ Error saving claim: $e');
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getClaims({
+    String? farmerId,
+    int limit = 20,
+  }) async {
+    try {
+      var query = _db.collection('Claims').orderBy('timestamp', descending: true).limit(limit);
+      if (farmerId != null && farmerId.isNotEmpty) {
+        query = _db
+            .collection('Claims')
+            .where('farmerId', isEqualTo: farmerId)
+            .orderBy('timestamp', descending: true)
+            .limit(limit);
+      }
+
+      final snapshot = await query.get();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['docId'] = doc.id;
+        return data;
+      }).toList();
+    } catch (e) {
+      print('[Firestore] ❌ Error fetching claims: $e');
       return [];
     }
   }
