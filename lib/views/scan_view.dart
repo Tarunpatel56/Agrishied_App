@@ -185,16 +185,8 @@ class ScanView extends StatelessWidget {
         _buildDiseaseSection(data),
         const SizedBox(height: 16),
 
-        // 9. INSURANCE ELIGIBILITY CARD
-        _buildEligibilityCard(controller),
-        const SizedBox(height: 16),
-
-        // 10. FILE INSURANCE CLAIM — Blockchain Buttons
-        _buildClaimButtons(controller),
-        const SizedBox(height: 16),
-
-        // 11. FULL INSURANCE REPORT SECTION (below buttons)
-        _buildInsuranceReport(data, controller),
+        // 8B. PEST DETECTION
+        _buildPestSection(data),
         const SizedBox(height: 20),
       ],
     );
@@ -504,6 +496,10 @@ class ScanView extends StatelessWidget {
             _reportRow('Treatment', data.treatment, Icons.medical_services),
           ],
           _reportRow('Health Status', data.healthStatus, Icons.monitor_heart),
+          _reportRow('Pest', data.pestDetected, Icons.pest_control,
+              color: data.pestDetected.toLowerCase() != 'no pest detected' &&
+                  data.pestDetected.toLowerCase() != 'n/a'
+                  ? Colors.orange : Colors.green),
 
           const Divider(height: 20),
 
@@ -836,6 +832,106 @@ class ScanView extends StatelessWidget {
     );
   }
 
+  // ==========================================
+  // PEST DETECTION SECTION
+  // ==========================================
+  Widget _buildPestSection(data) {
+    final bool hasPest = data.pestDetected.toLowerCase() != 'no pest detected' &&
+        data.pestDetected.toLowerCase() != 'none' &&
+        data.pestDetected.toLowerCase() != 'n/a';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: hasPest ? Border.all(color: Colors.orange.withOpacity(0.4), width: 1.5) : null,
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                hasPest ? Icons.pest_control : Icons.verified,
+                color: hasPest ? Colors.orange[700] : Colors.green,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                hasPest ? "🐛 Pest Detected" : "✅ No Pest Detected",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: hasPest ? Colors.orange[800] : Colors.green[700],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildDetailRow(Icons.bug_report, "Pest", data.pestDetected),
+          if (hasPest) ...[
+            _buildDetailRow(Icons.category, "Type", data.pestType),
+            const Divider(height: 16),
+            // Organic removal — green card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.green.withOpacity(0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "🌿 Organic Removal (Desi Upay)",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 13),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    data.pestRemovalOrganic,
+                    style: const TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF333333)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Chemical removal — orange card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orange.withOpacity(0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "🧪 Chemical Treatment (Dawai)",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepOrange, fontSize: 13),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    data.pestRemovalChemical,
+                    style: const TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF333333)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  // ==========================================
+  // DISEASE SECTION
+  // ==========================================
   Widget _buildDiseaseSection(data) {
     final bool hasDisease = data.disease.toLowerCase() != 'no disease detected' &&
         data.disease.toLowerCase() != 'healthy' &&

@@ -20,6 +20,10 @@ class ScanModel {
   final int harvestDays;
   final String harvestDate;
   final int totalLifecycle;
+  final String pestDetected;
+  final String pestType;
+  final String pestRemovalOrganic;
+  final String pestRemovalChemical;
   final String confidence;
 
   ScanModel({
@@ -44,6 +48,10 @@ class ScanModel {
     this.harvestDays = 0,
     this.harvestDate = 'N/A',
     this.totalLifecycle = 0,
+    this.pestDetected = 'No pest detected',
+    this.pestType = 'N/A',
+    this.pestRemovalOrganic = 'N/A',
+    this.pestRemovalChemical = 'N/A',
     required this.confidence,
   });
 
@@ -70,6 +78,10 @@ class ScanModel {
       harvestDays: _parseInt(json['harvest_days']),
       harvestDate: json['harvest_date']?.toString() ?? 'N/A',
       totalLifecycle: _parseInt(json['total_lifecycle']),
+      pestDetected: json['pest_detected']?.toString() ?? 'No pest detected',
+      pestType: json['pest_type']?.toString() ?? 'N/A',
+      pestRemovalOrganic: json['pest_removal_organic']?.toString() ?? 'N/A',
+      pestRemovalChemical: json['pest_removal_chemical']?.toString() ?? 'N/A',
       confidence: json['confidence']?.toString() ?? '0',
     );
   }
@@ -96,6 +108,10 @@ class ScanModel {
         'harvest_days': harvestDays,
         'harvest_date': harvestDate,
         'total_lifecycle': totalLifecycle,
+        'pest_detected': pestDetected,
+        'pest_type': pestType,
+        'pest_removal_organic': pestRemovalOrganic,
+        'pest_removal_chemical': pestRemovalChemical,
         'confidence': confidence,
       };
 

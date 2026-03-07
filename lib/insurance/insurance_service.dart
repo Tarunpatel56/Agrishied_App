@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,7 +11,7 @@ class InsuranceService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 1. UPLOAD TO BLOCKCHAIN (Pinata IPFS)
+  // 1. UPLOAD TO BLOCKCHAIN (Pinata IPFS) — with retry
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Future<String?> uploadToBlockchain({
     required Map<String, dynamic> aiReport,
@@ -28,31 +29,49 @@ class InsuranceService {
       "aiDiagnostics": aiReport,
     };
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $pinataJwt',
-        },
-        body: jsonEncode({
-          "pinataContent": jsonBundle,
-          "pinataMetadata": {
-            "name": "AgriShield_Claim_${enrollmentId}_$timestamp",
-          }
-        }),
-      ).timeout(const Duration(seconds: 30));
-
-      if (response.statusCode == 200) {
-        final hash = jsonDecode(response.body)['IpfsHash'];
-        print('[Blockchain] ✅ IPFS Hash: $hash');
-        return hash;
-      } else {
-        print('[Blockchain] ❌ Upload failed: ${response.statusCode}');
+    final body = jsonEncode({
+      "pinataContent": jsonBundle,
+      "pinataMetadata": {
+        "name": "AgriShield_Claim_${enrollmentId}_$timestamp",
       }
-    } catch (e) {
-      print('[Blockchain] ❌ Upload Error: $e');
+    });
+
+    // Retry up to 3 times with 15s timeout each
+    for (int attempt = 1; attempt <= 3; attempt++) {
+      final client = http.Client();
+      try {
+        print('[Blockchain] 🔄 Attempt $attempt/3 — uploading to IPFS...');
+        final response = await client.post(
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $pinataJwt',
+          },
+          body: body,
+        ).timeout(const Duration(seconds: 15));
+
+        if (response.statusCode == 200) {
+          final hash = jsonDecode(response.body)['IpfsHash'];
+          print('[Blockchain] ✅ IPFS Hash: $hash');
+          return hash;
+        } else {
+          print('[Blockchain] ❌ Attempt $attempt failed: HTTP ${response.statusCode} — ${response.body}');
+        }
+      } on TimeoutException {
+        print('[Blockchain] ⏳ Attempt $attempt timed out (15s)');
+      } catch (e) {
+        print('[Blockchain] ❌ Attempt $attempt error: $e');
+      } finally {
+        client.close();
+      }
+
+      // Wait 2s before retry (except on last attempt)
+      if (attempt < 3) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
     }
+
+    print('[Blockchain] ❌ All 3 attempts failed — IPFS upload unsuccessful');
     return null;
   }
 
