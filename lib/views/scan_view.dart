@@ -384,7 +384,7 @@ class ScanView extends StatelessWidget {
           Text(
             eligible
                 ? 'Upload to blockchain (IPFS) for tamper-proof evidence'
-                : 'Insurance file karne ke liye fasal mein nuksan hona chahiye',
+                : 'Crop must have damage for insurance claim filing',
             style: TextStyle(fontSize: 12, color: eligible ? Colors.grey[600] : Colors.red[400]),
           ),
           const SizedBox(height: 16),
@@ -546,8 +546,8 @@ class ScanView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     controller.insuranceEligible.value
-                        ? 'VERDICT: Insurance ke liye eligible ✅'
-                        : 'VERDICT: Insurance ke liye eligible nahi ❌',
+                        ? 'VERDICT: Eligible for Insurance ✅'
+                        : 'VERDICT: Not Eligible for Insurance ❌',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,

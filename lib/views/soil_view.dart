@@ -301,7 +301,7 @@ class SoilView extends StatelessWidget {
                       color: Colors.white)),
               SizedBox(height: 6),
               Text(
-                  'Konse season ki fasal lagani hai?\nChoose the season for crop recommendations',
+                  'Which season crop do you want to plant?\nChoose the season for crop recommendations',
                   style: TextStyle(fontSize: 13, color: Colors.white70, height: 1.4)),
             ]),
           ),

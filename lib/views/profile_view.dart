@@ -5,6 +5,7 @@ import '../controllers/auth_controller.dart';
 import 'reports_view.dart';
 import 'login_view.dart';
 import 'soil_view.dart';
+import 'chatbot_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -200,6 +201,27 @@ class ProfileView extends StatelessWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2E7D32),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 4,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: () => Get.to(() => const ChatbotView()),
+              icon: const Icon(Icons.smart_toy_rounded, size: 26),
+              label: const Text(
+                'Chat with AgriBot',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B5E20),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),

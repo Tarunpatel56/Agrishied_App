@@ -31,7 +31,7 @@ class MarketView extends StatelessWidget {
             child: TextField(
               onChanged: (value) => controller.filterSearch(value),
               decoration: InputDecoration(
-                hintText: "Search Crop or Mandi...",
+                hintText: "Search Crop or Market...",
                 prefixIcon: const Icon(Icons.search, color: Color(0xFF2E7D32)),
                 filled: true,
                 fillColor: const Color(0xFFF0F7F0),
@@ -54,7 +54,7 @@ class MarketView extends StatelessWidget {
                     children: [
                       CircularProgressIndicator(color: Color(0xFF2E7D32)),
                       SizedBox(height: 16),
-                      Text('Loading mandi rates...',
+                      Text('Loading market rates...',
                           style: TextStyle(color: Colors.grey)),
                     ],
                   ),

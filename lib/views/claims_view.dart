@@ -162,7 +162,7 @@ class ClaimsView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Photo upload karein aur claim type select karein',
+            'Upload a photo and select your claim type',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
@@ -205,7 +205,7 @@ class ClaimsView extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Fasal ka photo upload karein aur claim type chunein',
+            'Upload a photo of your crop and select the claim type',
             style: TextStyle(fontSize: 13, color: Colors.grey[600]),
           ),
           const SizedBox(height: 20),

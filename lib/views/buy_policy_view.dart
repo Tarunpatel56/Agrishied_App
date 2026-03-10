@@ -448,7 +448,7 @@ class _BuyPolicyViewState extends State<BuyPolicyView> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Ab jab bhi fasal kharab ho, bas Scan karein.\nAI damage detect karega aur 70% se zyada hone par payout auto-approve hoga.',
+                      'Whenever your crop is damaged, just Scan it.\nAI will detect the damage and if it exceeds 70%, payout will be auto-approved.',
                       style: TextStyle(fontSize: 12, color: Colors.blue[900], height: 1.5),
                     ),
                   ),

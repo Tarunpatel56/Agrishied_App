@@ -9,6 +9,11 @@ import 'package:agrishield_app/views/profile_view.dart';
 import 'package:agrishield_app/views/reports_view.dart';
 import 'package:agrishield_app/views/govt_schemes_view.dart';
 import 'package:agrishield_app/views/buy_policy_view.dart';
+import 'package:agrishield_app/views/recovery_dashboard_view.dart';
+import 'package:agrishield_app/views/roi_calculator_view.dart';
+import 'package:agrishield_app/views/market_predictor_view.dart';
+import 'package:agrishield_app/views/claim_reinvest_view.dart';
+import 'package:agrishield_app/views/chatbot_view.dart';
 import '../controllers/auth_controller.dart';
 import 'login_view.dart';
 
@@ -220,6 +225,62 @@ class HomeScreen extends StatelessWidget {
                   onTap: () {
                     Get.back();
                     Get.to(() => const ReportsView());
+                  },
+                ),
+                const Divider(height: 20, indent: 16, endIndent: 16),
+                // ── AI Features ──
+                Padding(
+                  padding: const EdgeInsets.only(left: 20, top: 4, bottom: 4),
+                  child: Text('AI Features',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[500],
+                          letterSpacing: 1)),
+                ),
+                _drawerItem(
+                  icon: Icons.healing_rounded,
+                  label: 'Recovery Advisor',
+                  emoji: '🔬',
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const RecoveryDashboardView());
+                  },
+                ),
+                _drawerItem(
+                  icon: Icons.calculate_rounded,
+                  label: 'ROI Calculator',
+                  emoji: '💰',
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const RoiCalculatorView());
+                  },
+                ),
+                _drawerItem(
+                  icon: Icons.auto_graph_rounded,
+                  label: 'Market Predictor',
+                  emoji: '📈',
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const MarketPredictorView());
+                  },
+                ),
+                _drawerItem(
+                  icon: Icons.receipt_long_rounded,
+                  label: 'Claim & Re-invest',
+                  emoji: '🔗',
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const ClaimReinvestView());
+                  },
+                ),
+                _drawerItem(
+                  icon: Icons.smart_toy_rounded,
+                  label: 'AgriBot Chat',
+                  emoji: '🤖',
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const ChatbotView());
                   },
                 ),
                 const Divider(height: 20, indent: 16, endIndent: 16),
