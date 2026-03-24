@@ -1,14 +1,25 @@
-/// AgriShield AI — Central Backend Configuration
+/// AgriShield AI - Central Backend Configuration
 ///
-/// ⚡ SIRF YAHAN IP BADLO — baaki sab automatically update ho jayega
-/// Apne computer ka WiFi IP yahan daalo (cmd > ipconfig > IPv4 Address)
+/// Preferred flow for local development:
+/// flutter run --dart-define=BACKEND_HOST=10.33.215.46
 ///
-/// Example: 'http://192.168.1.5:5000'
+/// If no dart-define is supplied, the verified Wi-Fi IP below is used.
 class AppConfig {
-  // ✅ Apne computer ka current WiFi IP yahan daalo
-  static const String _backendHost = '172.31.22.46';
-  static const int _backendPort = 5000;
+  static const String _defaultBackendHost = '10.33.215.46';
+  static const int _defaultBackendPort = 5000;
 
-  /// Full backend base URL
-  static String get baseUrl => 'http://$_backendHost:$_backendPort';
+  static const String _backendBaseUrlOverride =
+      String.fromEnvironment('BACKEND_BASE_URL');
+  static const String _backendHost =
+      String.fromEnvironment('BACKEND_HOST', defaultValue: _defaultBackendHost);
+  static const int _backendPort =
+      int.fromEnvironment('BACKEND_PORT', defaultValue: _defaultBackendPort);
+
+  /// Full backend base URL used by all API controllers.
+  static String get baseUrl {
+    if (_backendBaseUrlOverride.isNotEmpty) {
+      return _backendBaseUrlOverride;
+    }
+    return 'http://$_backendHost:$_backendPort';
+  }
 }

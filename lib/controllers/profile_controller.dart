@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../config/app_config.dart';
 
 class ProfileController extends GetxController {
   final _storage = GetStorage();
@@ -28,7 +29,7 @@ class ProfileController extends GetxController {
   // Recent alerts
   var recentAlerts = <Map<String, dynamic>>[].obs;
 
-  static const String baseUrl = 'http://10.179.18.46:5000';
+  String get baseUrl => AppConfig.baseUrl;
 
   @override
   void onInit() {
