@@ -2,86 +2,67 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// AgriShield AI - Central Backend Configuration
+/// AgriShield AI — Central Backend Configuration
+/// =============================================
+/// Single source-of-truth for backend connectivity across the entire Flutter app.
 ///
-/// Automatically discovers the active working backend endpoint:
-/// 1. http://127.0.0.1:5000 (via `adb reverse tcp:5000 tcp:5000` on USB device / desktop / web)
-/// 2. http://10.186.46.46:5000 (Current active Wi-Fi LAN IP)
-/// 3. http://10.0.2.2:5000 (Android Emulator)
+/// Production Base URL: https://agrishiedai-backend.onrender.com
+/// Can be overridden at compile-time via:
+///   flutter build apk --dart-define=BACKEND_BASE_URL=https://your-custom-backend.com
 class AppConfig {
-  /// Current active Wi-Fi IP of this development machine
-  static const String currentWifiIp = '10.186.46.46';
-  static const int defaultBackendPort = 5000;
+  /// Live Production Render Backend URL (HTTPS)
+  static const String productionBaseUrl = 'https://agrishiedai-backend.onrender.com';
 
+  /// Compile-time environment override
   static const String _backendBaseUrlOverride = String.fromEnvironment(
     'BACKEND_BASE_URL',
-  );
-  static const String _backendHost = String.fromEnvironment(
-    'BACKEND_HOST',
-    defaultValue: currentWifiIp,
-  );
-  static const int _backendPort = int.fromEnvironment(
-    'BACKEND_PORT',
-    defaultValue: defaultBackendPort,
+    defaultValue: productionBaseUrl,
   );
 
   static String? _resolvedBaseUrl;
 
-  /// Full backend base URL used by all API controllers.
+  /// Central base URL used by all controllers, views, and services.
+  /// Guaranteed to never return localhost or a LAN IP in production.
   static String get baseUrl {
-    if (_backendBaseUrlOverride.isNotEmpty) {
-      return _backendBaseUrlOverride;
-    }
     if (_resolvedBaseUrl != null && _resolvedBaseUrl!.isNotEmpty) {
       return _resolvedBaseUrl!;
     }
-    return 'http://$_backendHost:$_backendPort';
+    if (_backendBaseUrlOverride.isNotEmpty) {
+      return _backendBaseUrlOverride;
+    }
+    return productionBaseUrl;
   }
 
-  /// Manually override or update the base URL
+  /// Manually update the base URL at runtime (e.g. for testing / custom servers)
   static void setBaseUrl(String url) {
     _resolvedBaseUrl = url.endsWith('/') ? url.substring(0, url.length - 1) : url;
-    debugPrint('[AppConfig] Base URL manually updated to: $_resolvedBaseUrl');
+    debugPrint('[AppConfig] Backend URL manually updated to: $_resolvedBaseUrl');
   }
 
-  /// Automatically probe candidates and lock onto the responsive backend URL
+  /// Connection timeouts
+  static const Duration connectTimeout = Duration(seconds: 15);
+  static const Duration requestTimeout = Duration(seconds: 45);
+  static const Duration uploadTimeout = Duration(seconds: 90);
+
+  /// Initializes and verifies connectivity to the backend.
+  /// Safely called on app launch without blocking the UI or crashing on network failure.
   static Future<String> autoDiscoverBackend() async {
-    if (_backendBaseUrlOverride.isNotEmpty) {
-      _resolvedBaseUrl = _backendBaseUrlOverride;
-      return _resolvedBaseUrl!;
-    }
-    if (_backendHost.isNotEmpty) {
-      _resolvedBaseUrl = 'http://$_backendHost:$_backendPort';
-      return _resolvedBaseUrl!;
-    }
+    final activeUrl = baseUrl;
+    debugPrint('[AppConfig] Using Backend: $activeUrl');
 
-    final candidates = [
-      'http://127.0.0.1:$defaultBackendPort',     // USB with adb reverse / Desktop
-      'http://$currentWifiIp:$defaultBackendPort', // Direct Wi-Fi LAN
-      'http://10.0.2.2:$defaultBackendPort',       // Android emulator loopback
-    ];
-
-    debugPrint('[AppConfig] Checking backend connection...');
-    for (final candidate in candidates) {
-      try {
-        final uri = Uri.parse('$candidate/');
-        final resp = await http.get(uri).timeout(const Duration(milliseconds: 1200));
-        if (resp.statusCode == 200) {
-          final data = json.decode(resp.body);
-          if (data is Map && data.containsKey('status')) {
-            _resolvedBaseUrl = candidate;
-            debugPrint('[AppConfig] Connected successfully to backend: $candidate');
-            return candidate;
-          }
-        }
-      } catch (_) {
-        // Candidate not responding, try next
+    try {
+      final uri = Uri.parse('$activeUrl/');
+      final resp = await http.get(uri).timeout(const Duration(seconds: 6));
+      if (resp.statusCode == 200) {
+        final data = json.decode(resp.body);
+        debugPrint('[AppConfig] Backend status: ${data['status'] ?? 'Online'}');
+      } else {
+        debugPrint('[AppConfig] Backend responded with HTTP ${resp.statusCode}');
       }
+    } catch (e) {
+      debugPrint('[AppConfig] Note: Backend ping notice (might be waking up from sleep): $e');
     }
 
-    // Default fallback
-    _resolvedBaseUrl = 'http://127.0.0.1:$defaultBackendPort';
-    debugPrint('[AppConfig] Backend probe complete, using: $_resolvedBaseUrl');
-    return _resolvedBaseUrl!;
+    return activeUrl;
   }
 }

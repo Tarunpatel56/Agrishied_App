@@ -4,9 +4,10 @@
 /// Flask backend (powered by Groq AI).
 ///
 /// Backend base URL is read from AppConfig (app_config.dart).
-/// All methods return the parsed JSON body or throw on error.
+/// All methods return parsed JSON or throw descriptive exceptions.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -22,26 +23,63 @@ class ApiService {
   // ─── Helpers ──────────────────────────────────────────────────
   Map<String, String> get _jsonHeaders => {'Content-Type': 'application/json'};
 
-  Future<Map<String, dynamic>> _get(String path,
-      {Map<String, String>? params, Duration timeout = const Duration(seconds: 20)}) async {
-    final uri = Uri.parse('$_base$path').replace(queryParameters: params);
-    final response = await http.get(uri).timeout(timeout);
-    return _handleResponse(response);
+  Future<Map<String, dynamic>> _get(
+    String path, {
+    Map<String, String>? params,
+    Duration timeout = const Duration(seconds: 25),
+  }) async {
+    try {
+      final uri = Uri.parse('$_base$path').replace(queryParameters: params);
+      final response = await http.get(uri).timeout(timeout);
+      return _handleResponse(response);
+    } on SocketException {
+      throw Exception('Network error: Could not reach server. Please check your internet connection.');
+    } on TimeoutException {
+      throw Exception('Server took too long to respond. Render free servers may take ~30s to wake up on first request.');
+    } catch (e) {
+      if (e is FormatException) {
+        throw Exception('Invalid server response format.');
+      }
+      rethrow;
+    }
   }
 
-  Future<Map<String, dynamic>> _post(String path, Map<String, dynamic> body,
-      {Duration timeout = const Duration(seconds: 60)}) async {
-    final response = await http
-        .post(Uri.parse('$_base$path'), headers: _jsonHeaders, body: json.encode(body))
-        .timeout(timeout);
-    return _handleResponse(response);
+  Future<Map<String, dynamic>> _post(
+    String path,
+    Map<String, dynamic> body, {
+    Duration timeout = const Duration(seconds: 60),
+  }) async {
+    try {
+      final response = await http
+          .post(Uri.parse('$_base$path'), headers: _jsonHeaders, body: json.encode(body))
+          .timeout(timeout);
+      return _handleResponse(response);
+    } on SocketException {
+      throw Exception('Network error: Could not reach server. Please check your internet connection.');
+    } on TimeoutException {
+      throw Exception('Server took too long to respond. Please try again.');
+    } catch (e) {
+      if (e is FormatException) {
+        throw Exception('Invalid server response format.');
+      }
+      rethrow;
+    }
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final decoded = json.decode(response.body);
-    if (response.statusCode == 200) return decoded as Map<String, dynamic>;
-    final errMsg = (decoded as Map<String, dynamic>)['error'] ?? 'Unknown error';
-    throw Exception('Backend error ${response.statusCode}: $errMsg');
+    try {
+      final decoded = json.decode(response.body);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (decoded is Map<String, dynamic>) return decoded;
+        return {'data': decoded, 'status': 'Success'};
+      }
+      final errMsg = (decoded is Map)
+          ? (decoded['error'] ?? decoded['message'] ?? 'Server error')
+          : 'Unknown server error';
+      throw Exception('Backend error ${response.statusCode}: $errMsg');
+    } on FormatException {
+      throw Exception('Backend returned status ${response.statusCode} with non-JSON body.');
+    }
   }
 
   // ─── 1. Health Check ──────────────────────────────────────────
@@ -49,13 +87,19 @@ class ApiService {
   Future<Map<String, dynamic>> healthCheck() => _get('/');
 
   // ─── 2. Crop Analysis (Vision AI) ────────────────────────────
-  /// POST /predict   multipart image upload → Groq llama-4-scout vision
+  /// POST /predict   multipart image upload → Groq vision
   Future<Map<String, dynamic>> analyzeCrop(File imageFile) async {
-    final request = http.MultipartRequest('POST', Uri.parse('$_base/predict'));
-    request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
-    final streamed = await request.send().timeout(const Duration(seconds: 90));
-    final response = await http.Response.fromStream(streamed);
-    return _handleResponse(response);
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse('$_base/predict'));
+      request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+      final streamed = await request.send().timeout(const Duration(seconds: 90));
+      final response = await http.Response.fromStream(streamed);
+      return _handleResponse(response);
+    } on SocketException {
+      throw Exception('Network error during image upload. Check internet connectivity.');
+    } on TimeoutException {
+      throw Exception('Crop analysis timed out. Groq AI vision inference took too long, please retry.');
+    }
   }
 
   // ─── 3. Last Scan ─────────────────────────────────────────────
@@ -79,13 +123,19 @@ class ApiService {
   Future<Map<String, dynamic>> getMandiPrices() => _get('/mandi-prices');
 
   // ─── 6. Soil Analysis (Vision AI) ────────────────────────────
-  /// POST /analyze-soil   multipart image upload → Groq llama-4-scout vision
+  /// POST /analyze-soil   multipart image upload → Groq vision
   Future<Map<String, dynamic>> analyzeSoil(File imageFile) async {
-    final request = http.MultipartRequest('POST', Uri.parse('$_base/analyze-soil'));
-    request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
-    final streamed = await request.send().timeout(const Duration(seconds: 90));
-    final response = await http.Response.fromStream(streamed);
-    return _handleResponse(response);
+    try {
+      final request = http.MultipartRequest('POST', Uri.parse('$_base/analyze-soil'));
+      request.files.add(await http.MultipartFile.fromPath('file', imageFile.path));
+      final streamed = await request.send().timeout(const Duration(seconds: 90));
+      final response = await http.Response.fromStream(streamed);
+      return _handleResponse(response);
+    } on SocketException {
+      throw Exception('Network error during soil image upload. Check internet connectivity.');
+    } on TimeoutException {
+      throw Exception('Soil analysis timed out. Please retry with a clearer photo.');
+    }
   }
 
   // ─── 7. Soil Plant Recommendations ───────────────────────────
@@ -94,7 +144,7 @@ class ApiService {
       _post('/soil-plant-recommendations', soilData);
 
   // ─── 8. Recovery Advice ───────────────────────────────────────
-  /// POST /recovery-advice   body: scan data JSON → Groq llama-3.3-70b
+  /// POST /recovery-advice   body: scan data JSON → Groq LLM
   Future<Map<String, dynamic>> getRecoveryAdvice(Map<String, dynamic> scanData) =>
       _post('/recovery-advice', scanData, timeout: const Duration(seconds: 60));
 
@@ -112,12 +162,12 @@ class ApiService {
       }, timeout: const Duration(seconds: 60));
 
   // ─── 10. Market Predictions ───────────────────────────────────
-  /// GET /market-predictions → Groq llama-3.3-70b
+  /// GET /market-predictions → Groq LLM
   Future<Map<String, dynamic>> getMarketPredictions() =>
       _get('/market-predictions', timeout: const Duration(seconds: 60));
 
   // ─── 11. AgriBot Chat ─────────────────────────────────────────
-  /// POST /agri-chat   body: message, language, history → Groq llama-3.3-70b
+  /// POST /agri-chat   body: message, language, history → Groq LLM
   Future<Map<String, dynamic>> agriChat({
     required String message,
     String language = 'hi',
@@ -155,9 +205,5 @@ class ApiService {
 
   // ─── 15. AI Model Info ────────────────────────────────────────
   /// GET /ai-info → returns active Groq model details
-  /// Models (Oct 2026):
-  ///   text   → moonshotai/kimi-k2-instruct  (1T MoE, 128K ctx)
-  ///   vision → meta-llama/llama-4-scout-17b-16e-instruct
-  ///   fallback → openai/gpt-oss-120b
   Future<Map<String, dynamic>> getAiInfo() => _get('/ai-info');
 }
