@@ -28,12 +28,23 @@ class ReportsController extends GetxController {
 
   Future<void> loadAllData() async {
     isLoading(true);
-    await Future.wait([
-      fetchCropScans(),
-      fetchSoilAnalyses(),
-      fetchAlertHistory(),
-      fetchLastScan(),
-    ]);
+    try {
+      await Future.wait([
+        fetchCropScans(),
+        fetchSoilAnalyses(),
+        fetchAlertHistory(),
+        fetchLastScan(),
+      ]).timeout(
+        const Duration(seconds: 12),
+        onTimeout: () {
+          // Firestore/network timeout — show whatever data loaded so far
+          print('[Reports] loadAllData timeout — showing partial data');
+          return <void>[];
+        },
+      );
+    } catch (e) {
+      print('[Reports] loadAllData error: $e');
+    }
     _computeStats();
     isLoading(false);
   }
