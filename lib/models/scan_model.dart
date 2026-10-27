@@ -121,4 +121,63 @@ class ScanModel {
     if (value is double) return value.toInt();
     return int.tryParse(value.toString()) ?? 0;
   }
+
+  String localizedPros(bool isHi) {
+    if (!isHi) {
+      if (pros.contains('पत्तियां हरी-भरी हैं') || pros.isEmpty) return 'Good foliage and healthy vegetative growth';
+      return pros;
+    }
+    if (pros == 'No data' || pros.isEmpty) return 'पत्तियां हरी-भरी हैं और बढ़वार सुचारू है।';
+    return pros;
+  }
+
+  String localizedCons(bool isHi) {
+    if (!isHi) {
+      if (cons.contains('कोई गंभीर समस्या नहीं') || cons.isEmpty) return 'No significant issues or pests observed';
+      return cons;
+    }
+    if (cons == 'No data' || cons.isEmpty || cons.toLowerCase() == 'no significant issues') {
+      return 'कोई गंभीर समस्या या बीमारी नहीं है।';
+    }
+    return cons;
+  }
+
+  String localizedDisease(bool isHi) {
+    if (!isHi) {
+      if (disease.contains('कोई रोग नहीं') || disease.toLowerCase() == 'healthy') {
+        return 'No disease detected (Healthy)';
+      }
+      return disease;
+    }
+    if (disease.toLowerCase() == 'no disease detected' || disease.toLowerCase() == 'healthy' || disease == 'N/A' || disease.toLowerCase() == 'none') {
+      return 'कोई रोग नहीं मिला (फसल स्वस्थ है)';
+    }
+    return disease;
+  }
+
+  String localizedTreatment(bool isHi) {
+    if (!isHi) {
+      if (treatment.contains('उपचार की आवश्यकता नहीं')) {
+        return 'No treatment needed, crop is healthy.';
+      }
+      return treatment;
+    }
+    if (treatment.toLowerCase() == 'no treatment needed' || treatment == 'N/A') {
+      return 'उपचार की आवश्यकता नहीं है, फसल सामान्य है।';
+    }
+    return treatment;
+  }
+
+  String localizedPest(bool isHi) {
+    if (!isHi) {
+      if (pestDetected.contains('कोई कीट नहीं')) {
+        return 'No pest detected';
+      }
+      return pestDetected;
+    }
+    if (pestDetected.toLowerCase() == 'no pest detected' || pestDetected == 'N/A' || pestDetected.toLowerCase() == 'none') {
+      return 'कोई हानिकारक कीट नहीं मिला';
+    }
+    return pestDetected;
+  }
 }

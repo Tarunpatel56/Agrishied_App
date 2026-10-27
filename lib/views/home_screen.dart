@@ -14,7 +14,12 @@ import 'package:agrishield_app/views/roi_calculator_view.dart';
 import 'package:agrishield_app/views/market_predictor_view.dart';
 import 'package:agrishield_app/views/claim_reinvest_view.dart';
 import 'package:agrishield_app/views/chatbot_view.dart';
+import 'package:agrishield_app/views/voice_assistance_view.dart';
+import 'package:agrishield_app/views/voice_assistant_view.dart';
+import 'package:agrishield_app/views/spray_advisor_view.dart';
+import 'package:agrishield_app/views/fertilizer_advisor_view.dart';
 import '../controllers/auth_controller.dart';
+
 import 'login_view.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -25,45 +30,42 @@ class HomeScreen extends StatelessWidget {
   final List<Widget> pages = [
     const ScanView(),
     const Wx(),
+    const VoiceAssistantView(),
     const ClaimsView(),
     const ProfileView(),
   ];
 
-  final List<String> pageTitles = [
-    'AgriShield AI',
-    'Weather',
-    'Claims',
-    'Profile',
-  ];
-
   @override
   Widget build(BuildContext context) {
+
+    final List<String> pageTitles = [
+      'app_name'.tr,
+      'weather'.tr,
+      'voice_assistant'.tr,
+      'claims'.tr,
+      'profile'.tr,
+    ];
+
     return Obx(() => Scaffold(
           appBar: AppBar(
-            title: Text(pageTitles[currentIndex.value]),
-            centerTitle: true,
+            title: Text(
+              currentIndex.value == 0 ? 'AgriShield AI' : pageTitles[currentIndex.value],
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            centerTitle: false,
             backgroundColor: const Color(0xFF2E7D32),
             foregroundColor: Colors.white,
-            elevation: 2,
+            elevation: 1,
             automaticallyImplyLeading: currentIndex.value == 0,
-            actions: currentIndex.value == 0
-                ? [
-                    IconButton(
-                      onPressed: () {
-                        currentIndex.value = 3;
-                      },
-                      icon: Container(
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 1.5),
-                        ),
-                        child: const Icon(Icons.person, size: 20),
-                      ),
-                      tooltip: 'Profile',
-                    ),
-                  ]
-                : null,
+            actions: [
+              IconButton(
+                onPressed: () {
+                  currentIndex.value = 4;
+                },
+                icon: const Icon(Icons.account_circle_outlined, color: Colors.white, size: 28),
+                tooltip: 'profile'.tr,
+              ),
+            ],
           ),
           drawer: currentIndex.value == 0 ? _buildDrawer(context) : null,
           body: pages[currentIndex.value],
@@ -71,24 +73,37 @@ class HomeScreen extends StatelessWidget {
             currentIndex: currentIndex.value,
             onTap: (index) => currentIndex.value = index,
             selectedItemColor: const Color(0xFF2E7D32),
-            unselectedItemColor: Colors.grey,
+            unselectedItemColor: const Color(0xFF757575),
+            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+            unselectedLabelStyle: const TextStyle(fontSize: 12),
             type: BottomNavigationBarType.fixed,
-            items: const [
+            backgroundColor: Colors.white,
+            elevation: 8,
+            items: [
               BottomNavigationBarItem(
-                icon: Icon(Icons.camera_alt),
-                label: 'Scan',
+                icon: const Icon(Icons.camera_alt_outlined),
+                activeIcon: const Icon(Icons.camera_alt),
+                label: 'scan'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.cloud),
-                label: 'Weather',
+                icon: const Icon(Icons.cloud_outlined),
+                activeIcon: const Icon(Icons.cloud),
+                label: 'weather'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.shield_rounded),
-                label: 'Claims',
+                icon: const Icon(Icons.mic_none_rounded),
+                activeIcon: const Icon(Icons.mic_rounded),
+                label: 'voice_assistant'.tr,
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded),
-                label: 'Profile',
+                icon: const Icon(Icons.shield_outlined),
+                activeIcon: const Icon(Icons.shield),
+                label: 'claims'.tr,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.person_outline),
+                activeIcon: const Icon(Icons.person),
+                label: 'profile'.tr,
               ),
             ],
           ),
@@ -97,6 +112,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
+      backgroundColor: Colors.white,
       child: Column(
         children: [
           // ── Drawer Header ──
@@ -104,13 +120,13 @@ class HomeScreen extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top + 20,
-              bottom: 20,
+              bottom: 22,
               left: 20,
               right: 20,
             ),
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1B5E20), Color(0xFF43A047)],
+                colors: [Color(0xFF1B5E20), Color(0xFF2E7D32), Color(0xFF388E3C)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -119,14 +135,26 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 65,
-                  height: 65,
+                  width: 68,
+                  height: 68,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.25),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2),
                   ),
-                  child: const Icon(Icons.eco, size: 32, color: Colors.white),
+                  child: Center(
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF1B5E20),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.eco, size: 30, color: Color(0xFFA5D6A7)),
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 14),
                 const Text(
@@ -139,10 +167,10 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Smart Farming System 🌱',
+                  'Smart Farming & AI Protection',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -155,145 +183,145 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
                 _drawerItem(
-                  icon: Icons.camera_alt_rounded,
-                  label: 'Crop Scan',
                   emoji: '📷',
+                  label: 'scan'.tr,
                   onTap: () {
                     currentIndex.value = 0;
                     Get.back();
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.cloud_rounded,
-                  label: 'Weather',
                   emoji: '🌤️',
+                  label: 'weather'.tr,
                   onTap: () {
                     currentIndex.value = 1;
                     Get.back();
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.store_rounded,
-                  label: 'Market Rates',
+                  emoji: '🎙️',
+                  label: 'voice_assistant'.tr,
+                  onTap: () {
+                    currentIndex.value = 2;
+                    Get.back();
+                  },
+                ),
+                _drawerItem(
                   emoji: '🏪',
+                  label: 'market_rates'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const MarketView());
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.landscape_rounded,
-                  label: 'Soil Analysis',
                   emoji: '🌍',
+                  label: 'soil_analysis'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const SoilView(showAppBar: true));
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.account_balance_rounded,
-                  label: 'Govt Schemes',
-                  emoji: '🏦',
+                  emoji: '🏛️',
+                  label: 'govt_schemes'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const GovtSchemesView());
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.shield_rounded,
-                  label: 'Buy Insurance',
                   emoji: '🛡️',
+                  label: 'buy_insurance'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const BuyPolicyView());
                   },
                 ),
-                const Divider(height: 20, indent: 16, endIndent: 16),
+                const Divider(height: 16, indent: 16, endIndent: 16, color: Color(0xFFEEEEEE)),
                 _drawerItem(
-                  icon: Icons.person_rounded,
-                  label: 'Profile',
                   emoji: '👤',
+                  label: 'profile'.tr,
                   onTap: () {
-                    currentIndex.value = 3;
+                    currentIndex.value = 4;
                     Get.back();
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.analytics_rounded,
-                  label: 'Reports',
                   emoji: '📊',
+                  label: 'reports'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const ReportsView());
                   },
                 ),
-                const Divider(height: 20, indent: 16, endIndent: 16),
-                // ── AI Features ──
+                const Divider(height: 16, indent: 16, endIndent: 16, color: Color(0xFFEEEEEE)),
                 Padding(
-                  padding: const EdgeInsets.only(left: 20, top: 4, bottom: 4),
-                  child: Text('AI Features',
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[500],
-                          letterSpacing: 1)),
+                  padding: const EdgeInsets.only(left: 20, top: 4, bottom: 8),
+                  child: Text(
+                    'ai_features'.tr,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[500],
+                      letterSpacing: 0.3,
+                    ),
+                  ),
                 ),
                 _drawerItem(
-                  icon: Icons.healing_rounded,
-                  label: 'Recovery Advisor',
+                  emoji: '🌦️',
+                  label: 'spray_advisor'.tr,
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const SprayAdvisorView());
+                  },
+                ),
+                _drawerItem(
+                  emoji: '📋',
+                  label: 'fertilizer_advisor'.tr,
+                  onTap: () {
+                    Get.back();
+                    Get.to(() => const FertilizerAdvisorView());
+                  },
+                ),
+                _drawerItem(
                   emoji: '🔬',
+                  label: 'recovery_advisor'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const RecoveryDashboardView());
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.calculate_rounded,
-                  label: 'ROI Calculator',
                   emoji: '💰',
+                  label: 'roi_calculator'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const RoiCalculatorView());
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.auto_graph_rounded,
-                  label: 'Market Predictor',
                   emoji: '📈',
+                  label: 'market_predictor'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const MarketPredictorView());
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.receipt_long_rounded,
-                  label: 'Claim & Re-invest',
                   emoji: '🔗',
+                  label: 'claim_reinvest'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const ClaimReinvestView());
                   },
                 ),
                 _drawerItem(
-                  icon: Icons.smart_toy_rounded,
-                  label: 'AgriBot Chat',
                   emoji: '🤖',
+                  label: 'agribot_chat'.tr,
                   onTap: () {
                     Get.back();
                     Get.to(() => const ChatbotView());
-                  },
-                ),
-                const Divider(height: 20, indent: 16, endIndent: 16),
-                _drawerItem(
-                  icon: Icons.logout_rounded,
-                  label: 'Logout',
-                  emoji: '🚪',
-                  color: Colors.red,
-                  onTap: () async {
-                    Get.back();
-                    final auth = Get.find<AuthController>();
-                    await auth.logout();
-                    Get.offAll(() => LoginView());
                   },
                 ),
               ],
@@ -301,11 +329,14 @@ class HomeScreen extends StatelessWidget {
           ),
 
           // ── Footer ──
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'AgriShield AI v1.0',
-              style: TextStyle(fontSize: 11, color: Colors.grey[400]),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'AgriShield AI v1.0',
+                style: TextStyle(fontSize: 12, color: Colors.grey[400], fontWeight: FontWeight.w500),
+              ),
             ),
           ),
         ],
@@ -314,30 +345,33 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _drawerItem({
-    required IconData icon,
-    required String label,
     required String emoji,
+    required String label,
     required VoidCallback onTap,
     Color? color,
   }) {
     return ListTile(
-      leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+      leading: SizedBox(
+        width: 32,
+        child: Text(emoji, style: const TextStyle(fontSize: 20)),
+      ),
       title: Text(
         label,
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: color ?? Colors.black87,
+          color: color ?? const Color(0xFF212121),
         ),
       ),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        size: 14,
-        color: color?.withOpacity(0.5) ?? Colors.grey[400],
+      trailing: const Icon(
+        Icons.chevron_right,
+        size: 20,
+        color: Color(0xFFBDBDBD),
       ),
       onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+      minLeadingWidth: 32,
+      dense: true,
     );
   }
 }

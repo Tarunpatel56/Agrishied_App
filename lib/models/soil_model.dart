@@ -73,6 +73,68 @@ class SoilModel {
     if (v is String) return int.tryParse(v) ?? 0;
     return 0;
   }
+
+  String localizedSoilType(bool isHi) {
+    if (!isHi) return soilType;
+    if (soilTypeHindi.isNotEmpty && soilTypeHindi != 'Unknown') return soilTypeHindi;
+    final lower = soilType.toLowerCase();
+    if (lower.contains('loam')) return 'दोमट मिट्टी (Loamy)';
+    if (lower.contains('clay')) return 'चिकनी मिट्टी (Clay)';
+    if (lower.contains('sand')) return 'बलुई मिट्टी (Sandy)';
+    if (lower.contains('alluvial')) return 'जलोढ़ मिट्टी (Alluvial)';
+    if (lower.contains('black')) return 'काली मिट्टी (Black Soil)';
+    if (lower.contains('red')) return 'लाल मिट्टी (Red Soil)';
+    if (lower.contains('silt')) return 'गाद मिट्टी (Silty)';
+    if (lower.contains('peat')) return 'पीट मिट्टी (Peaty)';
+    if (lower.contains('chalk')) return 'चूना मिट्टी (Chalky)';
+    if (lower.contains('laterite')) return 'लेटराइट मिट्टी (Laterite)';
+    return soilType;
+  }
+
+  String localizedHealth(bool isHi) {
+    if (!isHi) return soilHealth;
+    final lower = soilHealth.toLowerCase();
+    if (lower.contains('good') || lower.contains('excellent')) return 'उत्कृष्ट (Good)';
+    if (lower.contains('fair') || lower.contains('moderate')) return 'मध्यम (Fair)';
+    if (lower.contains('poor') || lower.contains('critical')) return 'कमजोर (Poor)';
+    return soilHealth;
+  }
+
+  String localizedTexture(bool isHi) {
+    if (!isHi) return soilTexture;
+    final lower = soilTexture.toLowerCase();
+    if (lower.contains('fine')) return 'बारीक कण (Fine-grained)';
+    if (lower.contains('medium')) return 'मध्यम कण (Medium-grained)';
+    if (lower.contains('coarse')) return 'दानेदार / खुरदरी (Coarse)';
+    return soilTexture;
+  }
+
+  String localizedMoisture(bool isHi) {
+    if (!isHi) return moistureLevel;
+    final lower = moistureLevel.toLowerCase();
+    if (lower.contains('dry')) return 'सूखी (Dry)';
+    if (lower.contains('moderat')) return 'सामान्य नमी (Moderate)';
+    if (lower.contains('wet')) return 'अधिक गीली (Wet)';
+    return moistureLevel;
+  }
+
+  String localizedOrganic(bool isHi) {
+    if (!isHi) return organicMatter;
+    final lower = organicMatter.toLowerCase();
+    if (lower.contains('high') || lower.contains('rich')) return 'पर्याप्त / उच्च (High)';
+    if (lower.contains('med')) return 'मध्यम (Medium)';
+    if (lower.contains('low')) return 'कम (Low)';
+    return organicMatter;
+  }
+
+  String localizedNPK(String val, bool isHi) {
+    if (!isHi) return val;
+    final lower = val.toLowerCase();
+    if (lower.contains('high') || lower.contains('rich')) return 'पर्याप्त';
+    if (lower.contains('med')) return 'मध्यम';
+    if (lower.contains('low')) return 'कम';
+    return val;
+  }
 }
 
 class PlantRecommendation {

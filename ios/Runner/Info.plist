@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>AgriShield AI needs microphone access to listen to your farming questions.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>AgriShield AI needs speech recognition access to transcribe your agricultural queries.</string>
 </dict>
 </plist>

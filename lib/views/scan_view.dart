@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/scan_controller.dart';
+import 'spray_advisor_view.dart';
+import 'fertilizer_advisor_view.dart';
+
 
 class ScanView extends StatelessWidget {
   const ScanView({super.key});
@@ -13,25 +16,31 @@ class ScanView extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7F0),
       body: Obx(() {
         if (controller.isLoading.value) return _buildLoadingState();
-        if (controller.result.value == null) return _buildPlaceholder();
+        if (controller.result.value == null) return _buildPlaceholder(controller);
 
         final data = controller.result.value!;
         return _buildResultView(data, controller);
       }),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: controller.showImagePicker,
-        label: const Text("Scan Crop", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: Text(
+          (Get.locale?.languageCode ?? 'hi') == 'hi' ? "फसल स्कैन" : "Crop Scan",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+        ),
         icon: const Icon(Icons.camera_alt, color: Colors.white),
         backgroundColor: const Color(0xFF2E7D32),
         elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
+
   }
 
   // ==========================================
   // LOADING STATE
   // ==========================================
   Widget _buildLoadingState() {
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -51,13 +60,13 @@ class ScanView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            "Analyzing Your Crop...",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2E7D32)),
+          Text(
+            isHi ? "आपकी फसल की जांच जारी है..." : "Analyzing Your Crop...",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2E7D32)),
           ),
           const SizedBox(height: 8),
           Text(
-            "AI is examining the image",
+            isHi ? "एआई मॉडल फसल की स्वास्थ्य स्थिति की जांच कर रहा है" : "AI is examining the image",
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
         ],
@@ -66,38 +75,52 @@ class ScanView extends StatelessWidget {
   }
 
   // ==========================================
+  // ==========================================
   // PLACEHOLDER (No scan yet)
   // ==========================================
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(ScanController controller) {
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
+
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32).withOpacity(0.08),
-              borderRadius: BorderRadius.circular(60),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 140,
+              height: 140,
+              decoration: const BoxDecoration(
+                color: Color(0xFFE8F5E9),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(Icons.eco, size: 70, color: Color(0xFF2E7D32)),
+              ),
             ),
-            child: const Icon(Icons.eco, size: 60, color: Color(0xFF2E7D32)),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            "AgriShield AI",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Tap 'Scan Crop' to analyze your crop",
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Get instant disease detection, growth analysis & more",
-            style: TextStyle(fontSize: 12, color: Colors.grey[400]),
-          ),
-        ],
+            const SizedBox(height: 28),
+            Text(
+              isHi ? "अपनी फसल स्कैन करें" : "Scan Your Crop",
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1B5E20),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              isHi
+                  ? "तत्काल रोग निदान और उपचार योजना के लिए फोटो खींचें या फसल की छवि अपलोड करें"
+                  : "Take a photo or upload crop image for instant\ndisease diagnosis & recovery plan",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -106,71 +129,73 @@ class ScanView extends StatelessWidget {
   // RESULT VIEW
   // ==========================================
   Widget _buildResultView(data, ScanController controller) {
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       children: [
         // 0. SCAN HISTORY CHIPS (multiple scans)
         if (controller.scanHistory.length > 1) ...[
-          _buildScanHistoryChips(controller),
+          _buildScanHistoryChips(controller, isHi),
           const SizedBox(height: 12),
         ],
 
         // 1. CROP HEADER
-        _buildCropHeader(data),
+        _buildCropHeader(data, isHi),
         const SizedBox(height: 16),
 
         // 2. HEALTH SCORE BAR
-        _buildHealthBar(data.healthScore, data.healthStatus),
+        _buildHealthBar(data.healthScore, data.healthStatus, isHi),
         const SizedBox(height: 16),
 
         // 3. INFO GRID (Age, Stage, Harvest)
-        _buildInfoGrid(data),
+        _buildInfoGrid(data, isHi),
         const SizedBox(height: 16),
 
         // 4. HARVEST PREDICTION
         _buildSection(
-          "🌾 Harvest Prediction",
+          isHi ? "🌾 कटाई अनुमान" : "🌾 Harvest Prediction",
           const Color(0xFF1B5E20),
           [
-            _buildDetailRow(Icons.calendar_today, "Expected Date", data.harvestDate),
-            _buildDetailRow(Icons.timer, "Days Remaining", "${data.harvestDays} days"),
-            _buildDetailRow(Icons.loop, "Total Lifecycle", "${data.totalLifecycle} days"),
-            _buildDetailRow(Icons.check_circle_outline, "Harvest Readiness", data.harvestReadiness),
+            _buildDetailRow(Icons.calendar_today, isHi ? "अनुमानित तारीख" : "Expected Date", data.harvestDate),
+            _buildDetailRow(Icons.timer, isHi ? "शेष दिन" : "Days Remaining", "${data.harvestDays} ${isHi ? 'दिन' : 'days'}"),
+            _buildDetailRow(Icons.loop, isHi ? "कुल फसल चक्र" : "Total Lifecycle", "${data.totalLifecycle} ${isHi ? 'दिन' : 'days'}"),
+            _buildDetailRow(Icons.check_circle_outline, isHi ? "कटाई तत्परता" : "Harvest Readiness", data.harvestReadiness),
           ],
         ),
         const SizedBox(height: 12),
 
         // 5. FIELD ANALYSIS (Pros & Cons)
         _buildSection(
-          "📊 Field Analysis",
+          isHi ? "📊 खेत विश्लेषण" : "📊 Field Analysis",
           Colors.teal,
           [
-            _buildHighlightBox("Strengths", data.pros, Colors.green),
+            _buildHighlightBox(isHi ? "मजबूत पक्ष (सकारात्मक)" : "Strengths", data.localizedPros(isHi), Colors.green),
             const SizedBox(height: 10),
-            _buildHighlightBox("Issues", data.cons, Colors.orange),
+            _buildHighlightBox(isHi ? "कमियां एवं समस्याएं" : "Issues", data.localizedCons(isHi), Colors.orange),
           ],
         ),
         const SizedBox(height: 12),
 
         // 6. GROWTH ADVISORY
         _buildSection(
-          "🌱 Growth Advisory",
+          isHi ? "🌱 बढ़वार एवं पोषण सलाह" : "🌱 Growth Advisory",
           Colors.blue[800]!,
           [
-            _buildDetailRow(Icons.science, "Nutrient Needs", data.requirements),
+            _buildDetailRow(Icons.science, isHi ? "पोषक तत्व आवश्यकता" : "Nutrient Needs", data.requirements),
             const Divider(height: 20),
-            _buildDetailRow(Icons.shopping_bag, "Products", data.products),
+            _buildDetailRow(Icons.shopping_bag, isHi ? "संस्तुत उत्पाद" : "Products", data.products),
             const Divider(height: 20),
-            _buildDetailRow(Icons.water_drop, "Irrigation", data.irrigationAdvice),
+            _buildDetailRow(Icons.water_drop, isHi ? "सिंचाई सलाह" : "Irrigation", data.irrigationAdvice),
             const Divider(height: 20),
-            _buildDetailRow(Icons.compost, "Fertilizer", data.fertilizerRecommendation),
+            _buildDetailRow(Icons.compost, isHi ? "उर्वरक सलाह" : "Fertilizer", data.fertilizerRecommendation),
           ],
         ),
         const SizedBox(height: 12),
 
         // 7. GROWTH TIPS
         _buildSection(
-          "💡 Growth Tips",
+          isHi ? "💡 फसल वृद्धि के नुस्खे" : "💡 Growth Tips",
           Colors.purple,
           [
             Text(
@@ -182,11 +207,105 @@ class ScanView extends StatelessWidget {
         const SizedBox(height: 12),
 
         // 8. DISEASE ALERT
-        _buildDiseaseSection(data),
+        _buildDiseaseSection(data, isHi),
         const SizedBox(height: 16),
 
         // 8B. PEST DETECTION
-        _buildPestSection(data),
+        _buildPestSection(data, isHi),
+        const SizedBox(height: 16),
+
+        // 9. AI ADVISOR ACTIONS (Crop Scan Integration)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFC8E6C9)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: Color(0xFF1B5E20), size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    (Get.locale?.languageCode ?? 'hi') == 'hi'
+                        ? 'एआई वैज्ञानिक परामर्श'
+                        : 'AI Agronomic Advisors',
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final ageVal = double.tryParse(data.age.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 25.0;
+                        Get.to(() => const SprayAdvisorView(), arguments: {
+                          'crop_name': data.cropName,
+                          'disease': (data.disease.isNotEmpty && data.disease != 'N/A') ? data.disease : data.healthStatus,
+                          'crop_age': ageVal,
+                          'auto_fetch': true,
+                        });
+                      },
+                      icon: const Icon(Icons.science, size: 16, color: Colors.white),
+                      label: Text(
+                        (Get.locale?.languageCode ?? 'hi') == 'hi' ? 'स्प्रे पर्चा' : 'Spray Advisor',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1B5E20),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        final ageVal = double.tryParse(data.age.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 25.0;
+                        Get.to(() => const FertilizerAdvisorView(), arguments: {
+                          'crop_name': data.cropName,
+                          'crop_age': ageVal,
+                          'auto_calc': true,
+                        });
+                      },
+                      icon: const Icon(Icons.inventory_2, size: 16, color: Colors.white),
+                      label: Text(
+                        (Get.locale?.languageCode ?? 'hi') == 'hi' ? 'उर्वरक गणना' : 'Fertilizer Plan',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7D32),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // 10. INSURANCE ELIGIBILITY & CLAIMS
+        Obx(() => _buildEligibilityCard(controller, isHi)),
+        const SizedBox(height: 14),
+        Obx(() => _buildClaimButtons(controller, isHi)),
+        const SizedBox(height: 14),
+        _buildInsuranceReport(data, controller, isHi),
         const SizedBox(height: 20),
       ],
     );
@@ -195,7 +314,7 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // SCAN HISTORY CHIPS
   // ==========================================
-  Widget _buildScanHistoryChips(ScanController controller) {
+  Widget _buildScanHistoryChips(ScanController controller, [bool isHi = false]) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -207,7 +326,7 @@ class ScanView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '📋 Scan History (${controller.scanHistory.length} scans)',
+            isHi ? '📋 स्कैन इतिहास (${controller.scanHistory.length} स्कैन)' : '📋 Scan History (${controller.scanHistory.length} scans)',
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
           ),
           const SizedBox(height: 8),
@@ -219,6 +338,7 @@ class ScanView extends StatelessWidget {
               itemBuilder: (ctx, i) {
                 final scan = controller.scanHistory[i];
                 final isSelected = controller.currentScanIndex.value == i;
+                final cropDisplayName = isHi && scan.cropNameHindi.isNotEmpty ? scan.cropNameHindi : scan.cropName;
                 return GestureDetector(
                   onTap: () => controller.viewScan(i),
                   child: Container(
@@ -232,7 +352,7 @@ class ScanView extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '${scan.cropName} (${scan.healthScore}%)',
+                      '$cropDisplayName (${scan.healthScore}%)',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -252,7 +372,7 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // INSURANCE ELIGIBILITY CARD
   // ==========================================
-  Widget _buildEligibilityCard(ScanController controller) {
+  Widget _buildEligibilityCard(ScanController controller, [bool isHi = false]) {
     final eligible = controller.insuranceEligible.value;
     final reason = controller.eligibilityReason.value;
     final data = controller.eligibilityData.value;
@@ -283,7 +403,9 @@ class ScanView extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  eligible ? '✅ Insurance Eligible' : '❌ Insurance Not Eligible',
+                  eligible
+                      ? (isHi ? '✅ फसल बीमा क्लेम हेतु पात्र' : '✅ Insurance Eligible')
+                      : (isHi ? '❌ फसल बीमा हेतु अपात्र' : '❌ Insurance Not Eligible'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -307,20 +429,20 @@ class ScanView extends StatelessWidget {
             Row(
               children: [
                 _eligibilityChip(
-                  '⚠️ Damage',
+                  isHi ? '⚠️ नुकसान' : '⚠️ Damage',
                   '${data['damage_percent']}%',
                   (data['damage_percent'] ?? 0) >= 40 ? Colors.red : Colors.orange,
                 ),
                 const SizedBox(width: 8),
                 _eligibilityChip(
-                  '🦠 Disease',
-                  data['has_disease'] == true ? 'Detected' : 'None',
+                  isHi ? '🦠 रोग' : '🦠 Disease',
+                  data['has_disease'] == true ? (isHi ? 'पाया गया' : 'Detected') : (isHi ? 'नहीं' : 'None'),
                   data['has_disease'] == true ? Colors.red : Colors.green,
                 ),
                 const SizedBox(width: 8),
                 _eligibilityChip(
-                  '🌤️ Weather',
-                  data['weather_supports'] == true ? 'Corroborated' : 'Normal',
+                  isHi ? '🌤️ मौसम' : '🌤️ Weather',
+                  data['weather_supports'] == true ? (isHi ? 'पुष्टि' : 'Corroborated') : (isHi ? 'सामान्य' : 'Normal'),
                   data['weather_supports'] == true ? Colors.orange : Colors.blue,
                 ),
               ],
@@ -352,7 +474,7 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // CLAIM FILING BUTTONS
   // ==========================================
-  Widget _buildClaimButtons(ScanController controller) {
+  Widget _buildClaimButtons(ScanController controller, [bool isHi = false]) {
     final eligible = controller.insuranceEligible.value;
 
     return Container(
@@ -366,13 +488,13 @@ class ScanView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.shield_rounded, color: Color(0xFF1B5E20), size: 20),
-              SizedBox(width: 8),
+              const Icon(Icons.shield_rounded, color: Color(0xFF1B5E20), size: 20),
+              const SizedBox(width: 8),
               Text(
-                '🛡️ File Insurance Claim',
-                style: TextStyle(
+                isHi ? '🛡️ फसल बीमा क्लेम दर्ज करें' : '🛡️ File Insurance Claim',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1B5E20),
@@ -383,8 +505,8 @@ class ScanView extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             eligible
-                ? 'Upload to blockchain (IPFS) for tamper-proof evidence'
-                : 'Crop must have damage for insurance claim filing',
+                ? (isHi ? 'अकाट्य साक्ष्य हेतु ब्लॉकचेन (IPFS) पर सुरक्षित अपलोड' : 'Upload to blockchain (IPFS) for tamper-proof evidence')
+                : (isHi ? 'बीमा क्लेम दर्ज करने के लिए फसल में नुकसान होना अनिवार्य है' : 'Crop must have damage for insurance claim filing'),
             style: TextStyle(fontSize: 12, color: eligible ? Colors.grey[600] : Colors.red[400]),
           ),
           const SizedBox(height: 16),
@@ -397,9 +519,9 @@ class ScanView extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: eligible ? () => controller.fileGovtClaim() : null,
                     icon: const Icon(Icons.account_balance, size: 18),
-                    label: const Text(
-                      'Sarkari Rahat',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    label: Text(
+                      isHi ? 'सरकारी राहत' : 'Sarkari Rahat',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2E7D32),
@@ -422,9 +544,9 @@ class ScanView extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: eligible ? () => controller.filePrivateClaim() : null,
                     icon: const Icon(Icons.business, size: 18),
-                    label: const Text(
-                      'Private Claim',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    label: Text(
+                      isHi ? 'निजी क्लेम' : 'Private Claim',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1565C0),
@@ -449,7 +571,7 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // FULL INSURANCE REPORT SECTION
   // ==========================================
-  Widget _buildInsuranceReport(data, ScanController controller) {
+  Widget _buildInsuranceReport(data, ScanController controller, [bool isHi = false]) {
     final eligData = controller.eligibilityData.value;
     final int damagePercent = (100 - data.healthScore as int).clamp(0, 100);
     final bool hasDisease = data.disease.toLowerCase() != 'no disease detected' &&
@@ -472,7 +594,7 @@ class ScanView extends StatelessWidget {
               Icon(Icons.description, color: Colors.indigo[700], size: 20),
               const SizedBox(width: 8),
               Text(
-                '📄 Insurance Analysis Report',
+                isHi ? '📄 फसल बीमा विश्लेषण रिपोर्ट' : '📄 Insurance Analysis Report',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -484,22 +606,46 @@ class ScanView extends StatelessWidget {
           const SizedBox(height: 14),
 
           // Report Table
-          _reportRow('Crop Name', data.cropName, Icons.eco),
-          _reportRow('Health Score', '${data.healthScore}%', Icons.favorite,
-              color: data.healthScore >= 60 ? Colors.green : Colors.red),
-          _reportRow('Damage Level', '$damagePercent%', Icons.warning_amber,
-              color: damagePercent > 70 ? Colors.red : damagePercent > 40 ? Colors.orange : Colors.green),
-          _reportRow('Disease', data.disease, Icons.coronavirus,
-              color: hasDisease ? Colors.red : Colors.green),
+          _reportRow(
+            isHi ? 'फसल का नाम' : 'Crop Name',
+            isHi && data.cropNameHindi.isNotEmpty ? data.cropNameHindi : data.cropName,
+            Icons.eco,
+          ),
+          _reportRow(
+            isHi ? 'स्वास्थ्य स्कोर' : 'Health Score',
+            '${data.healthScore}%',
+            Icons.favorite,
+            color: data.healthScore >= 60 ? Colors.green : Colors.red,
+          ),
+          _reportRow(
+            isHi ? 'नुकसान स्तर' : 'Damage Level',
+            '$damagePercent%',
+            Icons.warning_amber,
+            color: damagePercent > 70 ? Colors.red : damagePercent > 40 ? Colors.orange : Colors.green,
+          ),
+          _reportRow(
+            isHi ? 'फसल रोग' : 'Disease',
+            isHi ? (hasDisease ? data.disease : 'कोई रोग नहीं मिला') : data.disease,
+            Icons.coronavirus,
+            color: hasDisease ? Colors.red : Colors.green,
+          ),
           if (hasDisease) ...[
-            _reportRow('Disease Cause', data.diseaseCause, Icons.help_outline),
-            _reportRow('Treatment', data.treatment, Icons.medical_services),
+            _reportRow(isHi ? 'रोग का कारण' : 'Disease Cause', data.diseaseCause, Icons.help_outline),
+            _reportRow(isHi ? 'उपचार' : 'Treatment', data.treatment, Icons.medical_services),
           ],
-          _reportRow('Health Status', data.healthStatus, Icons.monitor_heart),
-          _reportRow('Pest', data.pestDetected, Icons.pest_control,
-              color: data.pestDetected.toLowerCase() != 'no pest detected' &&
-                  data.pestDetected.toLowerCase() != 'n/a'
-                  ? Colors.orange : Colors.green),
+          _reportRow(
+            isHi ? 'स्वास्थ्य स्थिति' : 'Health Status',
+            isHi ? (data.healthScore >= 80 ? 'पूर्णतः स्वस्थ' : data.healthScore >= 60 ? 'मध्यम तनाव' : 'गंभीर रोगग्रस्त') : data.healthStatus,
+            Icons.monitor_heart,
+          ),
+          _reportRow(
+            isHi ? 'कीट' : 'Pest',
+            isHi ? (data.pestDetected.toLowerCase().contains('no') || data.pestDetected == 'N/A' ? 'कोई कीट नहीं मिला' : data.pestDetected) : data.pestDetected,
+            Icons.pest_control,
+            color: data.pestDetected.toLowerCase() != 'no pest detected' &&
+                data.pestDetected.toLowerCase() != 'n/a'
+                ? Colors.orange : Colors.green,
+          ),
 
           const Divider(height: 20),
 
@@ -508,16 +654,18 @@ class ScanView extends StatelessWidget {
             children: [
               Icon(Icons.cloud, size: 16, color: Colors.blue[600]),
               const SizedBox(width: 6),
-              Text(
-                'Weather Corroboration: ',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-              Text(
-                eligData?['weather_supports'] == true ? '✅ Weather confirms damage risk' : '☀️ Normal weather conditions',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: eligData?['weather_supports'] == true ? Colors.orange[800] : Colors.blue[700],
+              Expanded(
+                child: Text(
+                  eligData?['weather_supports'] == true
+                      ? (isHi ? 'मौसम: ✅ मौसम नुकसान के जोखिम की पुष्टि करता है' : 'Weather: ✅ Weather confirms damage risk')
+                      : (isHi ? 'मौसम: ☀️ सामान्य मौसमी परिस्थितियां' : 'Weather: ☀️ Normal weather conditions'),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: eligData?['weather_supports'] == true ? Colors.orange[800] : Colors.blue[700],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -546,8 +694,8 @@ class ScanView extends StatelessWidget {
                 Expanded(
                   child: Text(
                     controller.insuranceEligible.value
-                        ? 'VERDICT: Eligible for Insurance ✅'
-                        : 'VERDICT: Not Eligible for Insurance ❌',
+                        ? (isHi ? 'अंतिम निर्णय: बीमा क्लेम हेतु पात्र ✅' : 'VERDICT: Eligible for Insurance ✅')
+                        : (isHi ? 'अंतिम निर्णय: बीमा क्लेम हेतु अपात्र ❌' : 'VERDICT: Not Eligible for Insurance ❌'),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -591,7 +739,10 @@ class ScanView extends StatelessWidget {
   // UI COMPONENTS
   // ==========================================
 
-  Widget _buildCropHeader(data) {
+  Widget _buildCropHeader(data, [bool isHi = false]) {
+    final primaryName = isHi && data.cropNameHindi.isNotEmpty ? data.cropNameHindi : data.cropName;
+    final secondaryName = isHi ? '' : (data.cropNameHindi.isNotEmpty ? data.cropNameHindi : '');
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -616,12 +767,12 @@ class ScanView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  data.cropName,
+                  primaryName,
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                if (data.cropNameHindi.isNotEmpty)
+                if (secondaryName.isNotEmpty)
                   Text(
-                    data.cropNameHindi,
+                    secondaryName,
                     style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 const SizedBox(height: 8),
@@ -632,7 +783,7 @@ class ScanView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    "AI Confidence: ${data.confidence}%",
+                    isHi ? "एआई सटीकता: ${data.confidence}%" : "AI Confidence: ${data.confidence}%",
                     style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -653,7 +804,7 @@ class ScanView extends StatelessWidget {
     );
   }
 
-  Widget _buildHealthBar(int score, String status) {
+  Widget _buildHealthBar(int score, String status, [bool isHi = false]) {
     Color barColor;
     if (score >= 80) {
       barColor = Colors.green;
@@ -663,6 +814,20 @@ class ScanView extends StatelessWidget {
       barColor = Colors.deepOrange;
     } else {
       barColor = Colors.red;
+    }
+
+    String statusText = status;
+    if (isHi) {
+      final s = status.toLowerCase();
+      if (s.contains('healthy') || s.contains('स्वस्थ')) {
+        statusText = 'पूर्णतः स्वस्थ';
+      } else if (s.contains('moderate') || s.contains('मध्यम')) {
+        statusText = 'मध्यम तनाव';
+      } else if (s.contains('severe') || s.contains('गंभीर')) {
+        statusText = 'गंभीर तनाव';
+      } else if (s.contains('critical') || s.contains('खतरनाक') || s.contains('संकट')) {
+        statusText = 'अति संकटग्रस्त';
+      }
     }
 
     return Container(
@@ -678,14 +843,14 @@ class ScanView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Crop Health Score", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              Text(isHi ? "फसल स्वास्थ्य स्कोर" : "Crop Health Score", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: barColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(status, style: TextStyle(color: barColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                child: Text(statusText, style: TextStyle(color: barColor, fontSize: 11, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -712,14 +877,14 @@ class ScanView extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoGrid(data) {
+  Widget _buildInfoGrid(data, [bool isHi = false]) {
     return Row(
       children: [
-        _infoTile("Crop Age", data.age, Icons.calendar_today, Colors.blue),
+        _infoTile(isHi ? "फसल आयु" : "Crop Age", data.age, Icons.calendar_today, Colors.blue),
         const SizedBox(width: 8),
-        _infoTile("Growth Stage", data.stage, Icons.grass, Colors.green),
+        _infoTile(isHi ? "विकास अवस्था" : "Growth Stage", data.stage, Icons.grass, Colors.green),
         const SizedBox(width: 8),
-        _infoTile("Harvest In", "${data.harvestDays}d", Icons.timer, Colors.orange),
+        _infoTile(isHi ? "कटाई समय" : "Harvest In", "${data.harvestDays}${isHi ? ' दिन' : 'd'}", Icons.timer, Colors.orange),
       ],
     );
   }
@@ -835,10 +1000,19 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // PEST DETECTION SECTION
   // ==========================================
-  Widget _buildPestSection(data) {
+  Widget _buildPestSection(data, [bool isHi = false]) {
     final bool hasPest = data.pestDetected.toLowerCase() != 'no pest detected' &&
         data.pestDetected.toLowerCase() != 'none' &&
         data.pestDetected.toLowerCase() != 'n/a';
+
+    final String titleText = hasPest
+        ? (isHi ? "🐛 कीट का प्रकोप देखा गया" : "🐛 Pest Detected")
+        : (isHi ? "✅ कोई हानिकारक कीट नहीं" : "✅ No Pest Detected");
+
+    final String pestLabel = isHi ? "कीट" : "Pest";
+    final String typeLabel = isHi ? "कीट प्रकार" : "Type";
+    final String organicTitle = isHi ? "🌿 जैविक रोकथाम (देसी उपाय)" : "🌿 Organic Removal";
+    final String chemicalTitle = isHi ? "🧪 रासायनिक उपचार" : "🧪 Chemical Treatment";
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -860,7 +1034,7 @@ class ScanView extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                hasPest ? "🐛 Pest Detected" : "✅ No Pest Detected",
+                titleText,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -870,9 +1044,9 @@ class ScanView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildDetailRow(Icons.bug_report, "Pest", data.pestDetected),
+          _buildDetailRow(Icons.bug_report, pestLabel, data.localizedPest(isHi)),
           if (hasPest) ...[
-            _buildDetailRow(Icons.category, "Type", data.pestType),
+            _buildDetailRow(Icons.category, typeLabel, data.pestType),
             const Divider(height: 16),
             // Organic removal — green card
             Container(
@@ -886,9 +1060,9 @@ class ScanView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "🌿 Organic Removal (Desi Upay)",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 13),
+                  Text(
+                    organicTitle,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -911,9 +1085,9 @@ class ScanView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "🧪 Chemical Treatment (Dawai)",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepOrange, fontSize: 13),
+                  Text(
+                    chemicalTitle,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.deepOrange, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -932,10 +1106,19 @@ class ScanView extends StatelessWidget {
   // ==========================================
   // DISEASE SECTION
   // ==========================================
-  Widget _buildDiseaseSection(data) {
+  Widget _buildDiseaseSection(data, [bool isHi = false]) {
     final bool hasDisease = data.disease.toLowerCase() != 'no disease detected' &&
         data.disease.toLowerCase() != 'healthy' &&
         data.disease.toLowerCase() != 'n/a';
+
+    final String titleText = hasDisease
+        ? (isHi ? "⚠️ फसल रोग का प्रकोप देखा गया" : "⚠️ Disease Detected")
+        : (isHi ? "✅ कोई रोग नहीं मिला" : "✅ No Disease Detected");
+
+    final String diseaseLabel = isHi ? "फसल रोग" : "Disease";
+    final String causeLabel = isHi ? "रोग का कारण" : "Cause";
+    final String preventionLabel = isHi ? "रोकथाम व बचाव" : "Prevention";
+    final String treatmentLabel = isHi ? "💊 उपचार परामर्श" : "💊 Treatment";
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -957,7 +1140,7 @@ class ScanView extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                hasDisease ? "⚠️ Disease Detected" : "✅ No Disease Detected",
+                titleText,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -967,10 +1150,10 @@ class ScanView extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildDetailRow(Icons.coronavirus, "Disease", data.disease),
+          _buildDetailRow(Icons.coronavirus, diseaseLabel, data.localizedDisease(isHi)),
           if (hasDisease) ...[
-            _buildDetailRow(Icons.help_outline, "Cause", data.diseaseCause),
-            _buildDetailRow(Icons.shield, "Prevention", data.diseasePrevention),
+            _buildDetailRow(Icons.help_outline, causeLabel, data.diseaseCause),
+            _buildDetailRow(Icons.shield, preventionLabel, data.diseasePrevention),
             const Divider(height: 16),
             Container(
               width: double.infinity,
@@ -982,14 +1165,39 @@ class ScanView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "💊 Treatment",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 13),
+                  Text(
+                    treatmentLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 13),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    data.treatment,
+                    data.localizedTreatment(isHi),
                     style: const TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF333333)),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.to(() => const SprayAdvisorView(), arguments: {
+                          'crop_name': data.cropName,
+                          'disease': data.disease,
+                        });
+                      },
+                      icon: const Icon(Icons.science_rounded, size: 16),
+                      label: Text(
+                        isHi
+                            ? 'विशेषज्ञ स्प्रे सलाह पर्ची देखें'
+                            : 'Get CIBRC Spray Prescription',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1B5E20),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
                   ),
                 ],
               ),

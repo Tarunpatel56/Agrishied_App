@@ -45,6 +45,7 @@ dependencies:
   url_launcher: ^6.2.0
   qr_flutter: ^4.1.0
   speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.5
 
 
 

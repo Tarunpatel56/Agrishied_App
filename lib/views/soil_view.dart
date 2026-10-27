@@ -39,83 +39,93 @@ class SoilView extends StatelessWidget {
   }
 
   // ═══════════════ LOADING ═══════════════
-  Widget _loading(String msg) => Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2E7D32).withAlpha(25),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: const Center(
-                child: CircularProgressIndicator(
-                    color: Color(0xFF2E7D32), strokeWidth: 3)),
+  Widget _loading(String msg) {
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
+    return Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2E7D32).withAlpha(25),
+            borderRadius: BorderRadius.circular(50),
           ),
-          const SizedBox(height: 24),
-          Text(msg.isNotEmpty ? msg : 'Analyzing...',
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32)),
-              textAlign: TextAlign.center),
-          const SizedBox(height: 8),
-          Text('AI is examining the soil',
-              style: TextStyle(fontSize: 13, color: Colors.grey[600])),
-        ]),
-      );
+          child: const Center(
+              child: CircularProgressIndicator(
+                  color: Color(0xFF2E7D32), strokeWidth: 3)),
+        ),
+        const SizedBox(height: 24),
+        Text(msg.isNotEmpty ? msg : (isHi ? 'मिट्टी की जांच जारी है...' : 'Analyzing...'),
+            style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32)),
+            textAlign: TextAlign.center),
+        const SizedBox(height: 8),
+        Text(isHi ? 'एआई मिट्टी के स्वास्थ्य एवं पोषक तत्वों की जांच कर रहा है' : 'AI is examining the soil',
+            style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+      ]),
+    );
+  }
 
   // ═══════════════ PLACEHOLDER ═══════════════
-  Widget _placeholder(SoilController c) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                  color: const Color(0xFF2E7D32).withAlpha(20),
-                  borderRadius: BorderRadius.circular(60)),
-              child: const Icon(Icons.landscape,
-                  size: 60, color: Color(0xFF2E7D32)),
+  Widget _placeholder(SoilController c) {
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+                color: const Color(0xFF2E7D32).withAlpha(20),
+                borderRadius: BorderRadius.circular(60)),
+            child: const Icon(Icons.landscape,
+                size: 60, color: Color(0xFF2E7D32)),
+          ),
+          const SizedBox(height: 24),
+          Text(isHi ? '🌍 मृदा (मिट्टी) परीक्षण' : '🌍 Soil Analysis',
+              style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20))),
+          const SizedBox(height: 10),
+          Text(
+              isHi
+                  ? 'मिट्टी की फोटो खींचें और एआई से जानें\nइसमें कौन से पौधे और फसलें सबसे अधिक पैदावार देंगी'
+                  : 'Take a soil photo and let AI tell you\nwhich plants & crops grow best in it',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  fontSize: 14, color: Colors.grey[600], height: 1.5)),
+          const SizedBox(height: 36),
+          SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: ElevatedButton.icon(
+              onPressed: () => c.showImagePicker(),
+              icon: const Icon(Icons.camera_alt, size: 22),
+              label: Text(isHi ? 'मिट्टी स्कैन करें' : 'Scan Soil',
+                  style:
+                      const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 3),
             ),
-            const SizedBox(height: 24),
-            const Text('🌍 Soil Analysis',
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B5E20))),
-            const SizedBox(height: 10),
-            Text(
-                'Take a soil photo and let AI tell you\nwhich plants & crops grow best in it',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 14, color: Colors.grey[600], height: 1.5)),
-            const SizedBox(height: 36),
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: () => c.showImagePicker(),
-                icon: const Icon(Icons.camera_alt, size: 22),
-                label: const Text('Scan Soil',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                    elevation: 3),
-              ),
-            ),
-          ]),
-        ),
-      );
+          ),
+        ]),
+      ),
+    );
+  }
 
   // ═══════════════ SOIL RESULT + OPTIONS ═══════════════
   Widget _soilResult(SoilController c) {
     final s = c.soilResult.value!;
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -135,14 +145,14 @@ class SoilView extends StatelessWidget {
           ),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Row(children: [
-              Icon(Icons.check_circle, color: Colors.white70, size: 18),
-              SizedBox(width: 6),
-              Text('Soil Analysis Complete',
-                  style: TextStyle(fontSize: 13, color: Colors.white70))
+            Row(children: [
+              const Icon(Icons.check_circle, color: Colors.white70, size: 18),
+              const SizedBox(width: 6),
+              Text(isHi ? 'मृदा स्वास्थ्य विश्लेषण संपन्न' : 'Soil Analysis Complete',
+                  style: const TextStyle(fontSize: 13, color: Colors.white70))
             ]),
             const SizedBox(height: 10),
-            Text('${s.soilType} (${s.soilTypeHindi})',
+            Text(s.localizedSoilType(isHi),
                 style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -160,7 +170,7 @@ class SoilView extends StatelessWidget {
                             ? Colors.orangeAccent
                             : Colors.redAccent))),
             const SizedBox(height: 6),
-            Text('Health: ${s.healthScore}% — ${s.soilHealth}',
+            Text(isHi ? 'स्वास्थ्य स्तर: ${s.healthScore}% — ${s.localizedHealth(true)}' : 'Health: ${s.healthScore}% — ${s.soilHealth}',
                 style: const TextStyle(fontSize: 12, color: Colors.white)),
           ]),
         ),
@@ -175,13 +185,13 @@ class SoilView extends StatelessWidget {
             crossAxisSpacing: 8,
             childAspectRatio: 1.45,
             children: [
-              _detailCard('pH Level', s.pHLevel, Icons.science, Colors.blue),
+              _detailCard(isHi ? 'पीएच मान (pH)' : 'pH Level', s.pHLevel, Icons.science, Colors.blue),
               _detailCard(
-                  'Texture', s.soilTexture, Icons.grain, Colors.brown),
+                  isHi ? 'मिट्टी स्वरूप (Texture)' : 'Texture', s.localizedTexture(isHi), Icons.grain, Colors.brown),
               _detailCard(
-                  'Moisture', s.moistureLevel, Icons.water_drop, Colors.cyan),
+                  isHi ? 'नमी स्तर (Moisture)' : 'Moisture', s.localizedMoisture(isHi), Icons.water_drop, Colors.cyan),
               _detailCard(
-                  'Organic Matter', s.organicMatter, Icons.eco, Colors.green),
+                  isHi ? 'जीवांश (Organic Matter)' : 'Organic Matter', s.localizedOrganic(isHi), Icons.eco, Colors.green),
             ]),
         const SizedBox(height: 10),
 
@@ -195,16 +205,16 @@ class SoilView extends StatelessWidget {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('🧪 NPK Levels',
-                          style: TextStyle(
+                      Text(isHi ? '🧪 मुख्य पोषक तत्व (NPK स्तर)' : '🧪 NPK Levels',
+                          style: const TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
                       Row(children: [
-                        _npk('N', s.nitrogenLevel, Colors.blue),
+                        _npk(isHi ? 'N (नाइट्रोजन)' : 'N', s.localizedNPK(s.nitrogenLevel, isHi), Colors.blue),
                         const SizedBox(width: 8),
-                        _npk('P', s.phosphorusLevel, Colors.orange),
+                        _npk(isHi ? 'P (फास्फोरस)' : 'P', s.localizedNPK(s.phosphorusLevel, isHi), Colors.orange),
                         const SizedBox(width: 8),
-                        _npk('K', s.potassiumLevel, Colors.purple),
+                        _npk(isHi ? 'K (पोटाश)' : 'K', s.localizedNPK(s.potassiumLevel, isHi), Colors.purple),
                       ]),
                     ]))),
         const SizedBox(height: 10),
@@ -220,12 +230,12 @@ class SoilView extends StatelessWidget {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(children: [
-                        Icon(Icons.tips_and_updates,
+                      Row(children: [
+                        const Icon(Icons.tips_and_updates,
                             color: Colors.blue, size: 18),
-                        SizedBox(width: 6),
-                        Text('Advisory',
-                            style: TextStyle(
+                        const SizedBox(width: 6),
+                        Text(isHi ? 'विशेषज्ञ कृषि परामर्श' : 'Advisory',
+                            style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue))
@@ -240,26 +250,30 @@ class SoilView extends StatelessWidget {
         const SizedBox(height: 20),
 
         // Options
-        const Text('What would you like to know?',
-            style: TextStyle(
+        Text(isHi ? 'आप क्या अनुशंसा देखना चाहते हैं?' : 'What would you like to know?',
+            style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1B5E20))),
         const SizedBox(height: 4),
-        Text('Get plant or crop recommendations',
+        Text(isHi ? 'गमले/बगीचे अथवा खेत की फसलों की सलाह प्राप्त करें' : 'Get plant or crop recommendations',
             style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         const SizedBox(height: 14),
         _optionCard(
             '🌱',
-            'Plants',
-            'Find the best plants for this soil\nFull details — age, growth, water, care, diseases',
+            isHi ? 'पौधे (गमले व बगीचे हेतु)' : 'Plants',
+            isHi
+                ? 'इस मिट्टी के लिए 20-25 सर्वोत्तम पौधे\nपूर्ण विवरण — आयु, बढ़वार, जल, पोषण व रोग रोकथाम'
+                : 'Find the best plants for this soil\nFull details — age, growth, water, care, diseases',
             const Color(0xFF2E7D32),
             () => c.getPlantRecommendations()),
         const SizedBox(height: 12),
         _optionCard(
             '🌾',
-            'Crops',
-            'Take 3+ field photos for best crop suggestions\nYield, profit, advantages, disadvantages & more',
+            isHi ? 'फसलें (खेत की बुवाई हेतु)' : 'Crops',
+            isHi
+                ? 'खेत की 3+ फोटो अपलोड कर सटीक फसल सुझाव पाएं\nपैदावार, मुनाफा, लाभ, सावधानियां एवं खाद प्रबंधन'
+                : 'Take 3+ field photos for best crop suggestions\nYield, profit, advantages, disadvantages & more',
             const Color(0xFFE65100),
             () => c.startCropFlow()),
         const SizedBox(height: 12),
@@ -267,7 +281,7 @@ class SoilView extends StatelessWidget {
             child: TextButton.icon(
                 onPressed: () => c.resetAnalysis(),
                 icon: const Icon(Icons.refresh, size: 16),
-                label: const Text('New Scan'),
+                label: Text(isHi ? 'नया मिट्टी स्कैन करें' : 'New Scan'),
                 style:
                     TextButton.styleFrom(foregroundColor: Colors.grey[600]))),
         const SizedBox(height: 16),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../config/app_config.dart';
+import 'language_controller.dart';
 
 class ChatMessage {
   final String content;
@@ -26,14 +28,25 @@ class ChatbotController extends GetxController {
   var isTyping = false.obs;
   var language = 'hi'.obs; // hi = Hindi, en = English
   var isListening = false.obs;
+  var speechAvailable = false.obs;
+  var soundLevel = 0.0.obs;
+
   final textController = TextEditingController();
   final scrollController = ScrollController();
+  final stt.SpeechToText _speech = stt.SpeechToText();
 
   String get baseUrl => AppConfig.baseUrl;
 
   @override
   void onInit() {
     super.onInit();
+    // Sync language preference
+    if (Get.isRegistered<LanguageController>()) {
+      language.value = Get.find<LanguageController>().currentLanguage.value;
+    } else {
+      language.value = Get.locale?.languageCode ?? 'hi';
+    }
+
     // Welcome message
     messages.add(ChatMessage(
       content: language.value == 'hi'
@@ -41,18 +54,48 @@ class ChatbotController extends GetxController {
           : '🌾 Hello! I\'m AgriBot — your agriculture assistant.\n\nAsk me anything about crops, diseases, pesticides, market prices, weather, or farming!',
       isUser: false,
     ));
+
+    // Initialize speech recognition early
+    _initSpeech();
   }
 
   @override
   void onClose() {
+    if (_speech.isListening) {
+      _speech.stop();
+    }
     textController.dispose();
     scrollController.dispose();
     super.onClose();
   }
 
+  /// Initialize speech recognition engine
+  Future<void> _initSpeech() async {
+    try {
+      speechAvailable.value = await _speech.initialize(
+        onStatus: (status) {
+          if (status == 'notListening' || status == 'done') {
+            isListening.value = false;
+          }
+        },
+        onError: (errorNotification) {
+          isListening.value = false;
+          print("[AgriBot] Speech error: ${errorNotification.errorMsg}");
+        },
+      );
+    } catch (e) {
+      speechAvailable.value = false;
+      print("[AgriBot] Speech initialization exception: $e");
+    }
+  }
+
   /// Toggle language
   void toggleLanguage() {
     language.value = language.value == 'hi' ? 'en' : 'hi';
+    if (_speech.isListening) {
+      _speech.stop();
+      isListening.value = false;
+    }
     messages.add(ChatMessage(
       content: language.value == 'hi'
           ? '🔄 भाषा बदली गई: हिंदी'
@@ -62,12 +105,92 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
   }
 
+  /// Start or stop microphone speech recognition
+  Future<void> toggleListening() async {
+    if (isListening.value) {
+      await stopListening();
+      return;
+    }
+
+    if (!speechAvailable.value) {
+      await _initSpeech();
+      if (!speechAvailable.value) {
+        Get.snackbar(
+          language.value == 'hi' ? 'माइक्रोफ़ोन अनुपलब्ध' : 'Microphone Unavailable',
+          language.value == 'hi'
+              ? 'कृपया ऐप सेटिंग्स में माइक्रोफ़ोन की अनुमति दें।'
+              : 'Please grant microphone permissions in app settings.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange.shade800,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+        return;
+      }
+    }
+
+    final isHi = language.value == 'hi';
+    final targetLocaleId = isHi ? 'hi_IN' : 'en_IN';
+
+    // Verify if preferred locale is available
+    String selectedLocale = targetLocaleId;
+    try {
+      final locales = await _speech.locales();
+      final hasLocale = locales.any((l) => l.localeId.toLowerCase().startsWith(isHi ? 'hi' : 'en'));
+      if (hasLocale) {
+        final match = locales.firstWhere((l) => l.localeId.toLowerCase().startsWith(isHi ? 'hi' : 'en'));
+        selectedLocale = match.localeId;
+      }
+    } catch (_) {}
+
+    isListening.value = true;
+
+    try {
+      await _speech.listen(
+        onResult: (result) {
+          textController.text = result.recognizedWords;
+          textController.selection = TextSelection.fromPosition(
+            TextPosition(offset: textController.text.length),
+          );
+          if (result.finalResult) {
+            isListening.value = false;
+          }
+        },
+        localeId: selectedLocale,
+        listenFor: const Duration(seconds: 30),
+        pauseFor: const Duration(seconds: 3),
+        onSoundLevelChange: (level) {
+          soundLevel.value = level;
+        },
+        cancelOnError: true,
+        partialResults: true,
+      );
+    } catch (e) {
+      isListening.value = false;
+      print("[AgriBot] Listen exception: $e");
+    }
+  }
+
+  Future<void> stopListening() async {
+    try {
+      if (_speech.isListening) {
+        await _speech.stop();
+      }
+    } catch (_) {}
+    isListening.value = false;
+  }
+
   /// Send message to AgriBot
   Future<void> sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
+    if (isListening.value) {
+      await stopListening();
+    }
+
+    final userQuery = text.trim();
     // Add user message
-    messages.add(ChatMessage(content: text.trim(), isUser: true));
+    messages.add(ChatMessage(content: userQuery, isUser: true));
     textController.clear();
     _scrollToBottom();
 
@@ -87,7 +210,7 @@ class ChatbotController extends GetxController {
             Uri.parse('$baseUrl/agri-chat'),
             headers: {'Content-Type': 'application/json'},
             body: json.encode({
-              'message': text.trim(),
+              'message': userQuery,
               'language': language.value,
               'history': history,
             }),
@@ -132,6 +255,9 @@ class ChatbotController extends GetxController {
   void onSpeechResult(String text) {
     if (text.trim().isNotEmpty) {
       textController.text = text;
+      textController.selection = TextSelection.fromPosition(
+        TextPosition(offset: textController.text.length),
+      );
     }
   }
 

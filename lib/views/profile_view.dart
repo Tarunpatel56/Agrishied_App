@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/language_controller.dart';
 import 'reports_view.dart';
 import 'login_view.dart';
 import 'soil_view.dart';
 import 'chatbot_view.dart';
+import 'voice_assistance_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -30,6 +32,14 @@ class ProfileView extends StatelessWidget {
                     children: [
                       // ── Profile Card ──
                       _buildProfileCard(controller),
+                      const SizedBox(height: 16),
+
+                      // ── Language Selector Card ──
+                      _buildLanguageCard(),
+                      const SizedBox(height: 16),
+
+                      // ── Voice Assistance Card ──
+                      _buildVoiceAssistanceCard(),
                       const SizedBox(height: 16),
 
                       // ── Communication Buttons ──
@@ -509,6 +519,125 @@ class ProfileView extends StatelessWidget {
               color: Colors.white.withOpacity(0.7),
               size: 18,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageCard() {
+    final langController = Get.find<LanguageController>();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.language_rounded, color: Color(0xFF2E7D32), size: 22),
+              const SizedBox(width: 8),
+              Text(
+                'select_language'.tr,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Obx(() {
+            final isHindi = langController.isHindi;
+            return Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => langController.changeLanguage('en'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: !isHindi ? const Color(0xFF2E7D32) : const Color(0xFFF1F8E9),
+                      foregroundColor: !isHindi ? Colors.white : const Color(0xFF2E7D32),
+                      elevation: !isHindi ? 2 : 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('English (US)'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => langController.changeLanguage('hi'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isHindi ? const Color(0xFF2E7D32) : const Color(0xFFF1F8E9),
+                      foregroundColor: isHindi ? Colors.white : const Color(0xFF2E7D32),
+                      elevation: isHindi ? 2 : 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('हिंदी (Hindi)'),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVoiceAssistanceCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => Get.to(() => const VoiceAssistanceView()),
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2E7D32).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.phone_in_talk_rounded, color: Color(0xFF2E7D32), size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'voice_assistance'.tr,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Twilio Dual-Language AI Call (Hindi & English)',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
           ],
         ),
       ),

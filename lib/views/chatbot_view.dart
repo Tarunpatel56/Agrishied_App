@@ -109,22 +109,6 @@ class ChatbotView extends StatelessWidget {
 
   /// Quick action chips
   Widget _buildQuickActions(ChatbotController c) {
-    final actions = c.language.value == 'hi'
-        ? [
-            '🌾 फसल की बीमारी',
-            '💰 मंडी भाव',
-            '🌧️ मौसम सलाह',
-            '🧪 खाद कितनी डालें',
-            '🐛 कीट नियंत्रण',
-          ]
-        : [
-            '🌾 Crop Disease',
-            '💰 Market Price',
-            '🌧️ Weather Tips',
-            '🧪 Fertilizer Guide',
-            '🐛 Pest Control',
-          ];
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -339,52 +323,103 @@ class ChatbotView extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Mic button
-          Obx(() => GestureDetector(
-                onTap: () {
-                  // Toggle mic listening - actual speech_to_text integration
-                  c.isListening.value = !c.isListening.value;
-                  if (c.isListening.value) {
-                    Get.snackbar(
-                      '🎙️ Listening...',
-                      c.language.value == 'hi'
-                          ? 'बोलिए, मैं सुन रहा हूं...'
-                          : 'Speak now, I\'m listening...',
-                      snackPosition: SnackPosition.TOP,
-                      duration: const Duration(seconds: 2),
-                      backgroundColor: _primary.withOpacity(0.9),
-                      colorText: Colors.white,
-                    );
-                    // Auto-stop after 5 seconds
-                    Future.delayed(const Duration(seconds: 5), () {
-                      c.isListening.value = false;
-                    });
-                  }
-                },
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: c.isListening.value
-                        ? Colors.red.withOpacity(0.1)
-                        : _primary.withOpacity(0.08),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: c.isListening.value
-                          ? Colors.red.withOpacity(0.3)
-                          : _primary.withOpacity(0.2),
+          // Listening indicator bar when speech recognition is active
+          Obx(() {
+            if (!c.isListening.value) return const SizedBox.shrink();
+            final isHi = c.language.value == 'hi';
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  child: Icon(
-                    c.isListening.value ? Icons.mic : Icons.mic_none,
-                    color: c.isListening.value ? Colors.red : _primary,
-                    size: 20,
+                  const SizedBox(width: 8),
+                  Text(
+                    isHi ? '🎙️ सुन रहा हूँ... अपना प्रश्न बोलें' : '🎙️ Listening... Speak your question',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red.shade800,
+                    ),
                   ),
-                ),
-              )),
-          const SizedBox(width: 8),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => c.stopListening(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade700,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        isHi ? 'रोकें' : 'Stop',
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+          Row(
+            children: [
+              // Mic button
+              Obx(() => Tooltip(
+                    message: c.isListening.value
+                        ? (c.language.value == 'hi' ? 'रोकें' : 'Stop Listening')
+                        : (c.language.value == 'hi' ? 'बोलकर पूछें' : 'Speak Question'),
+                    child: GestureDetector(
+                      onTap: () => c.toggleListening(),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: c.isListening.value
+                              ? Colors.red
+                              : _primary.withOpacity(0.08),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: c.isListening.value
+                                ? Colors.red.shade700
+                                : _primary.withOpacity(0.2),
+                            width: c.isListening.value ? 2 : 1,
+                          ),
+                          boxShadow: c.isListening.value
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.red.withOpacity(0.4),
+                                    blurRadius: 10,
+                                    spreadRadius: 2,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Icon(
+                          c.isListening.value ? Icons.stop : Icons.mic,
+                          color: c.isListening.value ? Colors.white : _primary,
+                          size: 22,
+                        ),
+                      ),
+                    ),
+                  )),
+              const SizedBox(width: 8),
 
           // Text input
           Expanded(
@@ -440,6 +475,8 @@ class ChatbotView extends StatelessWidget {
                   ),
                 ),
               )),
+            ],
+          ),
         ],
       ),
     );

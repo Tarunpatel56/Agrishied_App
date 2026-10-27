@@ -10,6 +10,7 @@ import '../config/app_config.dart';
 import '../insurance/insurance_service.dart';
 import '../controllers/weather_controller.dart';
 import 'blockchain_controller.dart';
+import 'language_controller.dart';
 
 class ScanController extends GetxController {
   var isLoading = false.obs;
@@ -59,14 +60,18 @@ class ScanController extends GetxController {
   /// Send image to backend for AI analysis
   Future<void> _analyzeImage(String imagePath) async {
     isLoading(true);
+    final isHi = Get.isRegistered<LanguageController>()
+        ? Get.find<LanguageController>().isHindi
+        : (Get.locale?.languageCode ?? 'hi') == 'hi';
     try {
       var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/predict'));
       request.files.add(await http.MultipartFile.fromPath('file', imagePath));
+      request.fields['lang'] = isHi ? 'hi' : 'en';
 
       var response = await request.send().timeout(
         const Duration(seconds: 90),
         onTimeout: () {
-          throw Exception('Analysis timeout - please try again');
+          throw Exception(isHi ? 'विश्लेषण में समय अधिक लगा - कृपया पुनः प्रयास करें' : 'Analysis timeout - please try again');
         },
       );
 
@@ -88,15 +93,15 @@ class ScanController extends GetxController {
         _checkEligibility();
       } else {
         Get.snackbar(
-          "Analysis Failed",
-          jsonResponse['error']?.toString() ?? "Unknown error occurred",
+          isHi ? "जांच विफल" : "Analysis Failed",
+          jsonResponse['error']?.toString() ?? (isHi ? "अज्ञात त्रुटि हुई" : "Unknown error occurred"),
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Connection Error",
-        "Cannot reach AgriShield server. Make sure backend is running.",
+        isHi ? "सर्वर त्रुटि" : "Connection Error",
+        isHi ? "सर्वर से संपर्क नहीं हो सका। कृपया जांचें कि बैकएंड चालू है।" : "Cannot reach AgriShield server. Make sure backend is running.",
         snackPosition: SnackPosition.BOTTOM,
       );
       print("Error: $e");
@@ -147,9 +152,10 @@ class ScanController extends GetxController {
   /// File Government Relief Claim (Sarkari Rahat)
   void fileGovtClaim() {
     if (result.value == null) return;
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
     if (!insuranceEligible.value) {
       Get.snackbar(
-        '❌ Insurance Not Eligible',
+        isHi ? '❌ फसल बीमा हेतु अपात्र' : '❌ Insurance Not Eligible',
         eligibilityReason.value,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[50],
@@ -168,9 +174,10 @@ class ScanController extends GetxController {
   /// File Private Insurance Claim
   void filePrivateClaim() {
     if (result.value == null) return;
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
     if (!insuranceEligible.value) {
       Get.snackbar(
-        '❌ Insurance Not Eligible',
+        isHi ? '❌ फसल बीमा हेतु अपात्र' : '❌ Insurance Not Eligible',
         eligibilityReason.value,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[50],
@@ -188,6 +195,7 @@ class ScanController extends GetxController {
 
   /// Show image source picker dialog
   void showImagePicker() {
+    final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
@@ -207,14 +215,14 @@ class ScanController extends GetxController {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const Text(
-              "Analyze Your Crop",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              isHi ? "अपनी फसल की जांच करें" : "Analyze Your Crop",
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
-            const Text(
-              "Choose how to capture your crop image",
-              style: TextStyle(color: Colors.grey),
+            Text(
+              isHi ? "फसल की फोटो खींचने या चुनने का तरीका चुनें" : "Choose how to capture your crop image",
+              style: const TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 20),
             Row(
@@ -222,7 +230,7 @@ class ScanController extends GetxController {
               children: [
                 _buildPickerOption(
                   icon: Icons.camera_alt,
-                  label: "Camera",
+                  label: isHi ? "कैमरा" : "Camera",
                   color: Colors.green,
                   onTap: () {
                     Get.back();
@@ -231,7 +239,7 @@ class ScanController extends GetxController {
                 ),
                 _buildPickerOption(
                   icon: Icons.photo_library,
-                  label: "Gallery",
+                  label: isHi ? "गैलरी" : "Gallery",
                   color: Colors.blue,
                   onTap: () {
                     Get.back();
