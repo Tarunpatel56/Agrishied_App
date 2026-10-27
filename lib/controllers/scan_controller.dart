@@ -92,9 +92,23 @@ class ScanController extends GetxController {
         // ✅ Check insurance eligibility
         _checkEligibility();
       } else {
+        final rawErr = jsonResponse['error']?.toString() ?? '';
+        String displayErr;
+        if (rawErr.contains('429') || rawErr.contains('rate limit') || rawErr.contains('tokens per minute')) {
+          displayErr = isHi
+              ? 'एआई सर्वर व्यस्त है। बैकअप इंजन सक्रिय हो गया है, कृपया कुछ सेकंड बाद पुनः प्रयास करें।'
+              : 'AI server is temporarily busy. Backup engine active, please retry in a few seconds.';
+        } else if (rawErr.length > 100) {
+          displayErr = isHi
+              ? 'फसल विश्लेषण में अस्थायी समस्या आई। कृपया स्पष्ट प्रकाश में फोटो पुनः खींचें।'
+              : 'Crop analysis encountered a temporary issue. Please retake photo in good lighting.';
+        } else {
+          displayErr = rawErr.isNotEmpty ? rawErr : (isHi ? "अज्ञात त्रुटि हुई" : "Unknown error occurred");
+        }
+
         Get.snackbar(
           isHi ? "जांच विफल" : "Analysis Failed",
-          jsonResponse['error']?.toString() ?? (isHi ? "अज्ञात त्रुटि हुई" : "Unknown error occurred"),
+          displayErr,
           snackPosition: SnackPosition.BOTTOM,
         );
       }
