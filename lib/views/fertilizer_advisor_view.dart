@@ -90,12 +90,14 @@ class FertilizerAdvisorView extends StatelessWidget {
                     children: [
                       const Icon(Icons.tune, color: Color(0xFF1B5E20), size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        isHi ? 'फसल और खेत विनिर्देश' : 'Crop & Field Specifications',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B5E20),
+                      Expanded(
+                        child: Text(
+                          isHi ? 'फसल और खेत विनिर्देश' : 'Crop & Field Specifications',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B5E20),
+                          ),
                         ),
                       ),
                     ],
@@ -520,12 +522,14 @@ class FertilizerAdvisorView extends StatelessWidget {
                             children: [
                               const Icon(Icons.psychology, size: 18, color: Color(0xFF1B5E20)),
                               const SizedBox(width: 6),
-                              Text(
-                                isHi ? 'कृषि वैज्ञानिक परामर्श:' : 'AI Agronomic Insight (Gemini / Grok):',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Color(0xFF1B5E20),
+                              Expanded(
+                                child: Text(
+                                  isHi ? 'कृषि वैज्ञानिक परामर्श:' : 'AgriShield AI Agronomic Insight:',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Color(0xFF1B5E20),
+                                  ),
                                 ),
                               ),
                             ],

@@ -40,90 +40,93 @@ class ClaimsView extends StatelessWidget {
   // ==========================================
   Widget _buildProcessingView(BlockchainController c) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Animated icon
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF2E7D32),
-                  strokeWidth: 3,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Animated icon
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2E7D32).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF2E7D32),
+                    strokeWidth: 3,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 30),
-            const Text(
-              '🔗 Blockchain Notarization',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1B5E20),
+              const SizedBox(height: 30),
+              const Text(
+                '🔗 Blockchain Notarization',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // Step progress (6 steps now)
-            ...List.generate(6, (i) {
-              final step = i + 1;
-              final isActive = c.currentStep.value == step;
-              final isDone = c.currentStep.value > step;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: isDone
-                            ? Colors.green
-                            : isActive
-                                ? Colors.orange
-                                : Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: isDone
-                            ? const Icon(Icons.check, color: Colors.white, size: 16)
-                            : Text(
-                                '$step',
-                                style: TextStyle(
-                                  color: isActive ? Colors.white : Colors.grey[600],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+              // Step progress (6 steps now)
+              ...List.generate(6, (i) {
+                final step = i + 1;
+                final isActive = c.currentStep.value == step;
+                final isDone = c.currentStep.value > step;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: isDone
+                              ? Colors.green
+                              : isActive
+                                  ? Colors.orange
+                                  : Colors.grey[300],
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: isDone
+                              ? const Icon(Icons.check, color: Colors.white, size: 16)
+                              : Text(
+                                  '$step',
+                                  style: TextStyle(
+                                    color: isActive ? Colors.white : Colors.grey[600],
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                 ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        c.getStepLabel(step),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                          color: isActive
-                              ? const Color(0xFF1B5E20)
-                              : isDone
-                                  ? Colors.green
-                                  : Colors.grey[600],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          c.getStepLabel(step),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                            color: isActive
+                                ? const Color(0xFF1B5E20)
+                                : isDone
+                                    ? Colors.green
+                                    : Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

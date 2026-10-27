@@ -80,9 +80,10 @@ class _VoiceAssistantViewState extends State<VoiceAssistantView>
     return Obx(() {
       final isHi = LanguageController.isAppHindi;
       final currentMode = c.selectedLanguageMode.value;
+      final hasContent = c.userTranscript.isNotEmpty || c.aiResponse.isNotEmpty;
 
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -96,20 +97,31 @@ class _VoiceAssistantViewState extends State<VoiceAssistantView>
         ),
         child: Row(
           children: [
-            const Icon(Icons.translate, size: 20, color: _primaryLight),
-            const SizedBox(width: 8),
+            const Icon(Icons.translate, size: 18, color: _primaryLight),
+            const SizedBox(width: 6),
             Text(
-              isHi ? 'आवाज़ की भाषा:' : 'Speech Mode:',
+              isHi ? 'भाषा:' : 'Mode:',
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
-            const Spacer(),
-            _buildModeChip('auto', isHi ? 'ऑटो' : 'Auto', currentMode == 'auto'),
-            const SizedBox(width: 6),
-            _buildModeChip('hi', 'हिंदी', currentMode == 'hi'),
-            const SizedBox(width: 6),
-            _buildModeChip('en', 'English', currentMode == 'en'),
             const SizedBox(width: 8),
-            if (c.userTranscript.isNotEmpty || c.aiResponse.isNotEmpty)
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildModeChip('auto', isHi ? 'ऑटो' : 'Auto', currentMode == 'auto'),
+                    const SizedBox(width: 6),
+                    _buildModeChip('hi', 'हिंदी', currentMode == 'hi'),
+                    const SizedBox(width: 6),
+                    _buildModeChip('en', 'English', currentMode == 'en'),
+                  ],
+                ),
+              ),
+            ),
+            if (hasContent) ...[
+              const SizedBox(width: 6),
               IconButton(
                 onPressed: () => c.clearSession(),
                 icon: const Icon(Icons.refresh, size: 20, color: Colors.grey),
@@ -117,6 +129,7 @@ class _VoiceAssistantViewState extends State<VoiceAssistantView>
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
+            ],
           ],
         ),
       );
@@ -384,11 +397,13 @@ class _VoiceAssistantViewState extends State<VoiceAssistantView>
               children: [
                 const Icon(Icons.record_voice_over, size: 16, color: _primaryLight),
                 const SizedBox(width: 6),
-                Text(
-                  isHi ? 'आपने पूछा:' : 'You Asked:',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _primary),
+                Expanded(
+                  child: Text(
+                    isHi ? 'आपने पूछा:' : 'You Asked:',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: _primary),
+                  ),
                 ),
-                const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -477,17 +492,21 @@ class _VoiceAssistantViewState extends State<VoiceAssistantView>
                   child: const Icon(Icons.eco, size: 18, color: _primary),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  isHi ? 'कृषि विशेषज्ञ सलाह:' : 'AgriShield Advice:',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: _primary,
+                Expanded(
+                  child: Text(
+                    isHi ? 'कृषि विशेषज्ञ सलाह:' : 'AgriShield Advice:',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: _primary,
+                    ),
                   ),
                 ),
-                const Spacer(),
-                if (isSpeaking)
+                if (isSpeaking) ...[
+                  const SizedBox(width: 6),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.graphic_eq, size: 16, color: _accent),
                       const SizedBox(width: 4),
@@ -497,6 +516,7 @@ class _VoiceAssistantViewState extends State<VoiceAssistantView>
                       ),
                     ],
                   ),
+                ],
               ],
             ),
             const Divider(height: 18, color: Color(0xFFE8F5E9)),

@@ -82,44 +82,47 @@ class ScanView extends StatelessWidget {
     final isHi = (Get.locale?.languageCode ?? 'hi') == 'hi';
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 140,
-              height: 140,
-              decoration: const BoxDecoration(
-                color: Color(0xFFE8F5E9),
-                shape: BoxShape.circle,
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 140,
+                height: 140,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8F5E9),
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(Icons.eco, size: 70, color: Color(0xFF2E7D32)),
+                ),
               ),
-              child: const Center(
-                child: Icon(Icons.eco, size: 70, color: Color(0xFF2E7D32)),
+              const SizedBox(height: 28),
+              Text(
+                isHi ? "अपनी फसल स्कैन करें" : "Scan Your Crop",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1B5E20),
+                ),
               ),
-            ),
-            const SizedBox(height: 28),
-            Text(
-              isHi ? "अपनी फसल स्कैन करें" : "Scan Your Crop",
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF1B5E20),
+              const SizedBox(height: 12),
+              Text(
+                isHi
+                    ? "तत्काल रोग निदान और उपचार योजना के लिए फोटो खींचें या फसल की छवि अपलोड करें"
+                    : "Take a photo or upload crop image for instant\ndisease diagnosis & recovery plan",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              isHi
-                  ? "तत्काल रोग निदान और उपचार योजना के लिए फोटो खींचें या फसल की छवि अपलोड करें"
-                  : "Take a photo or upload crop image for instant\ndisease diagnosis & recovery plan",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                height: 1.4,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

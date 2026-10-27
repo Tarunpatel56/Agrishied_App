@@ -121,7 +121,7 @@ class ApiService {
   Future<Map<String, dynamic>> healthCheck() => _get('/');
 
   // ─── 2. Crop Analysis (Vision AI) ────────────────────────────
-  /// POST /predict   multipart image upload → Groq vision
+  /// POST /predict   multipart image upload → AgriShield AI vision
   Future<Map<String, dynamic>> analyzeCrop(File imageFile) async {
     try {
       final request = http.MultipartRequest('POST', Uri.parse('$_base/predict'));
@@ -133,12 +133,12 @@ class ApiService {
     } on SocketException {
       throw Exception('Network error during image upload. Check internet connectivity.');
     } on TimeoutException {
-      throw Exception('Crop analysis timed out. Groq AI vision inference took too long, please retry.');
+      throw Exception('Crop analysis timed out. AgriShield AI vision inference took too long, please retry.');
     }
   }
 
   // ─── 3. Soil Analysis (Vision AI) ────────────────────────────
-  /// POST /analyze-soil   multipart image upload → Groq vision
+  /// POST /analyze-soil   multipart image upload → AgriShield AI vision
   Future<Map<String, dynamic>> analyzeSoil(File imageFile) async {
     try {
       final request = http.MultipartRequest('POST', Uri.parse('$_base/analyze-soil'));

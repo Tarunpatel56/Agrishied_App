@@ -328,130 +328,133 @@ class MarketView extends StatelessWidget {
       ),
       isScrollControlled: true,
       builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(10),
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.auto_awesome, color: Color(0xFF2E7D32), size: 22),
                     ),
-                    child: const Icon(Icons.auto_awesome, color: Color(0xFF2E7D32), size: 22),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.localizedCropName(isHi),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            item.marketName,
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // AI Trend Content
+                Obx(() {
+                  if (c.isAiTrendLoading.value) {
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          const CircularProgressIndicator(color: Color(0xFF2E7D32)),
+                          const SizedBox(height: 12),
+                          Text(
+                            isHi ? 'एआई द्वारा मंडी रुझान विश्लेषण...' : 'AgriShield AI analyzing market trends...',
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F8E9),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFC8E6C9)),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          item.localizedCropName(isHi),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        Row(
+                          children: [
+                            const Icon(Icons.psychology_outlined, size: 16, color: Color(0xFF2E7D32)),
+                            const SizedBox(width: 6),
+                            Text(
+                              isHi ? 'एआई बाजार विश्लेषण एवं सलाह:' : 'AI Market Insight & Advice:',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1B5E20),
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 8),
                         Text(
-                          item.marketName,
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // AI Trend Content
-              Obx(() {
-                if (c.isAiTrendLoading.value) {
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        const CircularProgressIndicator(color: Color(0xFF2E7D32)),
-                        const SizedBox(height: 12),
-                        Text(
-                          isHi ? 'जेमिनी और ग्रॉक द्वारा मंडी रुझान विश्लेषण...' : 'Gemini & Grok analyzing market trends...',
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          c.aiTrendInsight.value,
+                          style: const TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF263238)),
                         ),
                       ],
                     ),
                   );
-                }
+                }),
+                const SizedBox(height: 14),
 
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
+                // Disclaimer
+                Container(
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F8E9),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFC8E6C9)),
+                    color: const Color(0xFFFFF8E1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.psychology_outlined, size: 16, color: Color(0xFF2E7D32)),
-                          const SizedBox(width: 6),
-                          Text(
-                            isHi ? 'एआई बाजार विश्लेषण एवं सलाह:' : 'AI Market Insight & Advice:',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1B5E20),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        c.aiTrendInsight.value,
-                        style: const TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF263238)),
+                      const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFFF57F17)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isHi
+                              ? 'सूचना: यह एआई विश्लेषण ऐतिहासिक रुझानों और आवक पर आधारित है। वास्तविक बिक्री भाव स्थानीय मंडी में फसल की गुणवत्ता पर निर्भर करता है।'
+                              : 'Notice: This AI analysis is based on historical patterns and arrivals. Real price depends on crop quality at local APMC.',
+                          style: const TextStyle(fontSize: 10, color: Color(0xFFF57F17), height: 1.3),
+                        ),
                       ),
                     ],
                   ),
-                );
-              }),
-              const SizedBox(height: 14),
-
-              // Disclaimer
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8E1),
-                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFFF57F17)),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        isHi
-                            ? 'सूचना: यह एआई विश्लेषण ऐतिहासिक रुझानों और आवक पर आधारित है। वास्तविक बिक्री भाव स्थानीय मंडी में फसल की गुणवत्ता पर निर्भर करता है।'
-                            : 'Notice: This AI analysis is based on historical patterns and arrivals. Real price depends on crop quality at local APMC.',
-                        style: const TextStyle(fontSize: 10, color: Color(0xFFF57F17), height: 1.3),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

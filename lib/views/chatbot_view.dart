@@ -36,15 +36,19 @@ class ChatbotView extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('AgriBot',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text('Agriculture AI Assistant',
-                    style: TextStyle(fontSize: 11, color: Colors.white70)),
-              ],
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('AgriBot',
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text('Agriculture AI Assistant',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 11, color: Colors.white70)),
+                ],
+              ),
             ),
           ],
         ),

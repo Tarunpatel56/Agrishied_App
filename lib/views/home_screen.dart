@@ -14,7 +14,6 @@ import 'package:agrishield_app/views/roi_calculator_view.dart';
 import 'package:agrishield_app/views/market_predictor_view.dart';
 import 'package:agrishield_app/views/claim_reinvest_view.dart';
 import 'package:agrishield_app/views/chatbot_view.dart';
-import 'package:agrishield_app/views/voice_assistance_view.dart';
 import 'package:agrishield_app/views/voice_assistant_view.dart';
 import 'package:agrishield_app/views/spray_advisor_view.dart';
 import 'package:agrishield_app/views/fertilizer_advisor_view.dart';

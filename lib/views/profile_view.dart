@@ -7,7 +7,6 @@ import 'reports_view.dart';
 import 'login_view.dart';
 import 'soil_view.dart';
 import 'chatbot_view.dart';
-import 'voice_assistance_view.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -36,10 +35,6 @@ class ProfileView extends StatelessWidget {
 
                       // ── Language Selector Card ──
                       _buildLanguageCard(),
-                      const SizedBox(height: 16),
-
-                      // ── Voice Assistance Card ──
-                      _buildVoiceAssistanceCard(),
                       const SizedBox(height: 16),
 
                       // ── Communication Buttons ──
@@ -190,42 +185,21 @@ class ProfileView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '🤖 AI Assistant',
+            '🤖 AgriShield AI Assistant',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           const Text(
-            'Call our AI for instant farming advice',
+            'Chat with AgriBot for instant farming advice',
             style: TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            height: 56,
-            child: ElevatedButton.icon(
-              onPressed: () => c.callAIAssistant(),
-              icon: const Icon(Icons.call_rounded, size: 26),
-              label: const Text(
-                'Call AI Assistant',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E7D32),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            height: 56,
+            height: 52,
             child: ElevatedButton.icon(
               onPressed: () => Get.to(() => const ChatbotView()),
-              icon: const Icon(Icons.smart_toy_rounded, size: 26),
+              icon: const Icon(Icons.smart_toy_rounded, size: 24),
               label: const Text(
                 'Chat with AgriBot',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -236,7 +210,7 @@ class ProfileView extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
-                elevation: 4,
+                elevation: 3,
               ),
             ),
           ),
@@ -592,57 +566,7 @@ class ProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildVoiceAssistanceCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () => Get.to(() => const VoiceAssistanceView()),
-        borderRadius: BorderRadius.circular(12),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.phone_in_talk_rounded, color: Color(0xFF2E7D32), size: 24),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'voice_assistance'.tr,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Twilio Dual-Language AI Call (Hindi & English)',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildLogoutButton() {
     return SizedBox(

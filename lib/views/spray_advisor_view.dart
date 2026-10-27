@@ -128,12 +128,14 @@ class SprayAdvisorView extends StatelessWidget {
                     children: [
                       const Icon(Icons.tune, color: Color(0xFF1B5E20), size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        isHi ? 'फसल और कीट विनिर्देश' : 'Crop & Pest Specifications',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B5E20),
+                      Expanded(
+                        child: Text(
+                          isHi ? 'फसल और कीट विनिर्देश' : 'Crop & Pest Specifications',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1B5E20),
+                          ),
                         ),
                       ),
                     ],
@@ -841,9 +843,11 @@ class SprayAdvisorView extends StatelessWidget {
                             children: [
                               const Icon(Icons.shield_outlined, color: Color(0xFFE65100), size: 18),
                               const SizedBox(width: 6),
-                              Text(
-                                isHi ? 'सुरक्षा दिशानिर्देश एवं सावधानियां' : 'Safety Guidelines (PPE & Care)',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              Expanded(
+                                child: Text(
+                                  isHi ? 'सुरक्षा दिशानिर्देश एवं सावधानियां' : 'Safety Guidelines (PPE & Care)',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                ),
                               ),
                             ],
                           ),

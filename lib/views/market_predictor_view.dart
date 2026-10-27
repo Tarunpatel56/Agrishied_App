@@ -17,35 +17,33 @@ class MarketPredictorView extends StatelessWidget {
     return Scaffold(
       backgroundColor: _darkBg,
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [_neonGreen.withOpacity(0.3), _neonGreen.withOpacity(0.1)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _neonGreen.withOpacity(0.5)),
-                boxShadow: [
-                  BoxShadow(color: _neonGreen.withOpacity(0.2), blurRadius: 10),
-                ],
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [_neonGreen.withOpacity(0.3), _neonGreen.withOpacity(0.1)],
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.auto_graph, color: _neonGreen, size: 16),
-                  SizedBox(width: 6),
-                  Text('AgriShield AI Prediction',
-                      style: TextStyle(
-                          color: _neonGreen,
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _neonGreen.withOpacity(0.5)),
+              boxShadow: [
+                BoxShadow(color: _neonGreen.withOpacity(0.2), blurRadius: 10),
+              ],
             ),
-          ],
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.auto_graph, color: _neonGreen, size: 16),
+                SizedBox(width: 6),
+                Text('AgriShield AI Prediction',
+                    style: TextStyle(
+                        color: _neonGreen,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
         ),
         backgroundColor: const Color(0xFF0D1229),
         foregroundColor: Colors.white,
